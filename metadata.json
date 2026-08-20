@@ -1,0 +1,6 @@
+{
+  "name": "ScanLogix - Inventaire & Location IA",
+  "description": "Gestion d'inventaire et suivi des locations en temps réel avec analyse photo intelligente par Gemini, scan mobile départ/retour et synchronisation desktop.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
