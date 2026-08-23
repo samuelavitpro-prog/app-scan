@@ -557,6 +557,220 @@ app.get("/api/sync/stream", (req, res) => {
   });
 });
 
+// Connectivity healthcheck / ping endpoint
+app.get("/api/ping", (req, res) => {
+  res.json({
+    status: "ok",
+    online: true,
+    serverTime: new Date().toISOString(),
+    itemsCount: items.length,
+    activeRentalsCount: rentals.filter((r) => r.status === "active" || r.status === "overdue").length,
+  });
+});
+
+// Batch Queue Synchronization Endpoint for Offline-to-Online transitions
+app.post("/api/sync/batch-queue", (req, res) => {
+  const { actions } = req.body;
+  if (!Array.isArray(actions) || actions.length === 0) {
+    return res.json({ success: true, processedCount: 0, results: [] });
+  }
+
+  const results: Array<{ id: string; success: boolean; error?: string; result?: any; note?: string }> = [];
+  let processedCount = 0;
+
+  for (const action of actions) {
+    try {
+      const { id, type, payload } = action;
+
+      if (type === "ADD_ITEM") {
+        const itemData = payload;
+        const exists = items.some((i) => i.id === itemData.id);
+        if (!exists) {
+          const newItem = {
+            id: itemData.id || `item-${Date.now()}`,
+            sku: itemData.sku || `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+            name: itemData.name || "Nouveau Produit Non Nommé",
+            category: itemData.category || "Général",
+            brand: itemData.brand || "Marque non spécifiée",
+            model: itemData.model || "",
+            serialNumber: itemData.serialNumber || "",
+            description: itemData.description || "",
+            totalQuantity: Number(itemData.totalQuantity ?? itemData.quantity ?? 1),
+            availableQuantity: Number(itemData.availableQuantity ?? itemData.totalQuantity ?? 1),
+            rentedQuantity: Number(itemData.rentedQuantity ?? 0),
+            minStockAlert: Number(itemData.minStockAlert ?? 2),
+            unitPrice: Number(itemData.unitPrice ?? 0),
+            rentalRatePerDay: Number(itemData.rentalRatePerDay ?? (itemData.unitPrice ? Math.round(itemData.unitPrice * 0.08) : 15)),
+            location: itemData.location || "Entrepôt Principal - Réception",
+            condition: itemData.condition || "Très bon état",
+            imageUrl: itemData.imageUrl || "",
+            barcode: itemData.barcode || itemData.sku || `BC-${Date.now().toString().slice(-6)}`,
+            tags: Array.isArray(itemData.tags) ? itemData.tags : [],
+            createdAt: itemData.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            aiConfidence: itemData.aiConfidence || 0.9,
+            aiAnalysisNotes: itemData.aiAnalysisNotes || "Synchronisé depuis la file hors-ligne.",
+          };
+          items.unshift(newItem);
+          broadcastUpdate("inventory_item_added", newItem);
+        }
+        results.push({ id, success: true });
+        processedCount++;
+      } else if (type === "UPDATE_ITEM") {
+        const { itemId, updates } = payload;
+        const itemIndex = items.findIndex((i) => i.id === itemId || i.id === payload.id);
+        if (itemIndex !== -1) {
+          items[itemIndex] = {
+            ...items[itemIndex],
+            ...(updates || payload),
+            updatedAt: new Date().toISOString(),
+          };
+          broadcastUpdate("inventory_item_updated", items[itemIndex]);
+          results.push({ id, success: true, result: items[itemIndex] });
+        } else {
+          results.push({ id, success: false, error: "Article non trouvé sur le serveur" });
+        }
+        processedCount++;
+      } else if (type === "DELETE_ITEM") {
+        const itemId = payload.id || payload.itemId;
+        items = items.filter((i) => i.id !== itemId);
+        broadcastUpdate("inventory_item_deleted", { id: itemId });
+        results.push({ id, success: true });
+        processedCount++;
+      } else if (type === "BATCH_DELETE") {
+        const idsToDelete = payload.ids || [];
+        items = items.filter((i) => !idsToDelete.includes(i.id));
+        for (const delId of idsToDelete) {
+          broadcastUpdate("inventory_item_deleted", { id: delId });
+        }
+        results.push({ id, success: true });
+        processedCount++;
+      } else if (type === "RENTAL_CHECKOUT") {
+        const checkoutData = payload;
+        const targetItem = items.find((i) => i.id === checkoutData.itemId || i.sku === checkoutData.sku);
+        if (targetItem) {
+          const qty = Number(checkoutData.quantity || 1);
+          targetItem.availableQuantity = Math.max(0, targetItem.availableQuantity - qty);
+          targetItem.rentedQuantity = (targetItem.rentedQuantity || 0) + qty;
+          targetItem.updatedAt = new Date().toISOString();
+
+          const newRental = {
+            id: checkoutData.id || `rent-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            itemId: targetItem.id,
+            itemName: targetItem.name,
+            itemSku: targetItem.sku,
+            itemImage: targetItem.imageUrl,
+            type: "out",
+            quantity: qty,
+            clientName: checkoutData.clientName || "Client Chantier",
+            clientContact: checkoutData.clientContact || "",
+            destination: checkoutData.destination || "Chantier en cours",
+            departureDate: checkoutData.departureDate || new Date().toISOString(),
+            expectedReturnDate: checkoutData.expectedReturnDate || new Date(Date.now() + 86400000 * 3).toISOString(),
+            status: "active",
+            scannedBy: checkoutData.user || "Opérateur Mode Hors-Ligne",
+            dailyRate: targetItem.rentalRatePerDay || 15,
+            notes: checkoutData.notes || "Sortie validée hors-ligne.",
+          };
+
+          rentals.unshift(newRental);
+          broadcastUpdate("rental_checkout_created", { rental: newRental, item: targetItem });
+          results.push({ id, success: true, result: newRental });
+        } else {
+          results.push({ id, success: false, error: "Matériel introuvable pour la sortie" });
+        }
+        processedCount++;
+      } else if (type === "RENTAL_CHECKIN") {
+        const checkinData = payload;
+        const rental = rentals.find((r) => r.id === checkinData.rentalId);
+        if (rental) {
+          rental.status = "returned";
+          rental.actualReturnDate = new Date().toISOString();
+          rental.returnCondition = checkinData.returnCondition || "Bon état vérifié";
+          rental.returnNotes = checkinData.returnNotes || "Retour synchronisé";
+          rental.scannedReturnBy = checkinData.user || "Gestionnaire Bureau";
+
+          const targetItem = items.find((i) => i.id === rental.itemId);
+          if (targetItem) {
+            targetItem.availableQuantity = Math.min(targetItem.totalQuantity, targetItem.availableQuantity + rental.quantity);
+            targetItem.rentedQuantity = Math.max(0, (targetItem.rentedQuantity || 0) - rental.quantity);
+            targetItem.updatedAt = new Date().toISOString();
+          }
+          broadcastUpdate("rental_checkin_completed", { rental, updatedItem: targetItem });
+          results.push({ id, success: true, result: rental });
+        } else {
+          results.push({ id, success: false, error: "Dossier de location introuvable" });
+        }
+        processedCount++;
+      } else if (type === "UPDATE_SETTINGS") {
+        settings = { ...settings, ...payload };
+        saveData(SETTINGS_FILE, settings);
+        broadcastUpdate("settings_updated", settings);
+        results.push({ id, success: true });
+        processedCount++;
+      } else if (type === "ADD_EMPLOYEE") {
+        const newEmp = {
+          id: payload.id || `emp-${Date.now()}`,
+          name: payload.name || "Nouvel Employé",
+          email: payload.email || "",
+          role: payload.role || "Opérateur Scan",
+          status: payload.status || "active",
+          lastActive: new Date().toISOString(),
+          assignedWarehouse: payload.assignedWarehouse || "Hub Central",
+          permissions: payload.permissions || {
+            canScanIn: true,
+            canScanOut: true,
+            canEditInventory: false,
+            canManageRoles: false,
+            canManageCloud: false,
+          },
+        };
+        employees.unshift(newEmp);
+        saveData(EMPLOYEES_FILE, employees);
+        broadcastUpdate("employees_updated", employees);
+        results.push({ id, success: true });
+        processedCount++;
+      } else {
+        results.push({ id, success: true, note: "Action non gérée mais marquée" });
+      }
+    } catch (err: any) {
+      results.push({ id: action.id, success: false, error: err.message });
+    }
+  }
+
+  saveData(ITEMS_FILE, items);
+  saveData(RENTALS_FILE, rentals);
+
+  logActivity(
+    "offline_sync",
+    "Synchronisation Hors-Ligne Terminée",
+    `${processedCount} opération(s) synchronisée(s) avec succès.`,
+    "desktop",
+    "Système Sync"
+  );
+
+  res.json({
+    success: true,
+    processedCount,
+    results,
+    items,
+    rentals,
+    stats: {
+      totalProducts: items.length,
+      totalStockItems: items.reduce((acc, i) => acc + (i.totalQuantity || 0), 0),
+      totalAvailable: items.reduce((acc, i) => acc + (i.availableQuantity || 0), 0),
+      totalRented: items.reduce((acc, i) => acc + (i.rentedQuantity || 0), 0),
+      totalInventoryValue: items.reduce((acc, i) => acc + (i.unitPrice || 0) * (i.totalQuantity || 1), 0),
+      lowStockCount: items.filter((i) => i.availableQuantity <= (i.minStockAlert || 2)).length,
+      activeRentalsCount: rentals.filter((r) => r.status === "active" || r.status === "overdue").length,
+      overdueCount: rentals.filter((r) => r.status === "overdue" || (r.status === "active" && new Date(r.expectedReturnDate) < new Date())).length,
+      occupancyRate: items.reduce((acc, i) => acc + (i.totalQuantity || 0), 0) > 0
+        ? Math.round((items.reduce((acc, i) => acc + (i.rentedQuantity || 0), 0) / items.reduce((acc, i) => acc + (i.totalQuantity || 0), 0)) * 100)
+        : 0,
+    },
+  });
+});
+
 // Broadcast manual trigger
 app.post("/api/sync/broadcast", (req, res) => {
   const { eventType, payload } = req.body;

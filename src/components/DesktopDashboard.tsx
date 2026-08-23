@@ -37,6 +37,8 @@ import {
   AlertCircle,
   FileText,
   ChevronDown,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import {
   InventoryItem,
@@ -46,8 +48,11 @@ import {
   AppSettings,
   Employee,
   ConnectedDevice,
+  QueuedOfflineAction,
 } from "../types";
 import { SettingsDashboard } from "./SettingsDashboard";
+import { ConnectivityIndicator } from "./ConnectivityIndicator";
+import { SyncQueueModal } from "./SyncQueueModal";
 
 interface DesktopDashboardProps {
   items: InventoryItem[];
@@ -74,6 +79,16 @@ interface DesktopDashboardProps {
   onRefresh?: () => void;
   isSyncing: boolean;
   driveSyncInfo: any;
+  isOnline?: boolean;
+  isSimulatedOffline?: boolean;
+  offlineQueue?: QueuedOfflineAction[];
+  onToggleSimulatedOffline?: () => void;
+  onSyncOfflineQueue?: () => Promise<void>;
+  onRemoveQueueItem?: (id: string) => void;
+  onClearQueue?: () => void;
+  onCheckConnection?: () => Promise<void>;
+  lastPingTime?: string;
+  onBatchDelete?: (ids: string[]) => Promise<boolean>;
 }
 
 export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
@@ -101,6 +116,16 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   onRefresh,
   isSyncing,
   driveSyncInfo,
+  isOnline = true,
+  isSimulatedOffline = false,
+  offlineQueue = [],
+  onToggleSimulatedOffline = () => {},
+  onSyncOfflineQueue = async () => {},
+  onRemoveQueueItem = () => {},
+  onClearQueue = () => {},
+  onCheckConnection = async () => {},
+  lastPingTime,
+  onBatchDelete,
 }) => {
   const [activeTab, setActiveTab] = useState<"inventory" | "rentals" | "logs" | "cloud" | "settings">("inventory");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -109,6 +134,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   const [showManualAddModal, setShowManualAddModal] = useState<boolean>(false);
   const [showDepartureModal, setShowDepartureModal] = useState<boolean>(false);
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
+  const [showSyncQueueModal, setShowSyncQueueModal] = useState<boolean>(false);
 
   // Batch selection in inventory
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
@@ -198,21 +224,31 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
 
     setIsBatchDeleting(true);
     try {
-      const res = await fetch("/api/inventory/batch-delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedItemIds }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast("success", `${data.deletedCount} article(s) supprimé(s) avec succès.`);
-        setSelectedItemIds([]);
-        onRefresh?.();
+      if (onBatchDelete) {
+        const ok = await onBatchDelete(selectedItemIds);
+        if (ok) {
+          showToast("success", `${selectedItemIds.length} article(s) supprimé(s).`);
+          setSelectedItemIds([]);
+        } else {
+          showToast("error", "Erreur lors de la suppression groupée.");
+        }
       } else {
-        showToast("error", "Erreur lors de la suppression groupée.");
+        const res = await fetch("/api/inventory/batch-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: selectedItemIds }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast("success", `${data.deletedCount} article(s) supprimé(s) avec succès.`);
+          setSelectedItemIds([]);
+          onRefresh?.();
+        } else {
+          showToast("error", "Erreur lors de la suppression groupée.");
+        }
       }
     } catch (err: any) {
-      showToast("error", "Erreur serveur : " + err.message);
+      showToast("error", "Erreur : " + err.message);
     } finally {
       setIsBatchDeleting(false);
     }
@@ -569,6 +605,17 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
 
   return (
     <div id="desktop-dashboard" className="w-full flex flex-col space-y-6">
+      {/* Persistent Offline & Sync Status Banner */}
+      <ConnectivityIndicator
+        isOnline={isOnline}
+        isSimulatedOffline={isSimulatedOffline}
+        pendingQueue={offlineQueue}
+        isSyncing={isSyncing}
+        onOpenQueueModal={() => setShowSyncQueueModal(true)}
+        onSyncNow={onSyncOfflineQueue}
+        onToggleSimulatedOffline={onToggleSimulatedOffline}
+      />
+
       {/* Toast feedback banner */}
       {actionFeedback && (
         <div
@@ -777,7 +824,36 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {/* Connectivity Status & Queue Button */}
+          <button
+            id="desktop-header-connectivity-btn"
+            type="button"
+            onClick={() => setShowSyncQueueModal(true)}
+            className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition shadow-xs ${
+              !isOnline
+                ? "bg-amber-950/60 border-amber-500/40 text-amber-300 hover:bg-amber-900/50"
+                : offlineQueue.length > 0
+                ? "bg-indigo-950/60 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/50"
+                : "bg-[#121524] border-[#22273e] text-slate-300 hover:text-white hover:bg-[#181d30]"
+            }`}
+            title="État de connexion et file d'attente hors-ligne"
+          >
+            {isOnline ? (
+              <Wifi className="w-3.5 h-3.5 text-emerald-400" />
+            ) : (
+              <WifiOff className="w-3.5 h-3.5 text-amber-400" />
+            )}
+            <span className="hidden sm:inline font-bold">
+              {isOnline ? "En Ligne" : "Hors-Ligne"}
+            </span>
+            {offlineQueue.length > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] animate-pulse">
+                {offlineQueue.length}
+              </span>
+            )}
+          </button>
+
           {/* Main CSV Export Button in Dashboard Header */}
           <button
             id="desktop-export-csv-btn"
@@ -2041,6 +2117,21 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
           </div>
         </div>
       )}
+      {/* Offline Sync Queue Details & Controls Modal */}
+      <SyncQueueModal
+        isOpen={showSyncQueueModal}
+        onClose={() => setShowSyncQueueModal(false)}
+        queue={offlineQueue}
+        isOnline={isOnline}
+        isSimulatedOffline={isSimulatedOffline}
+        onToggleSimulatedOffline={onToggleSimulatedOffline}
+        onSyncAll={onSyncOfflineQueue}
+        onRemoveItem={onRemoveQueueItem}
+        onClearQueue={onClearQueue}
+        isSyncing={isSyncing}
+        lastPingTime={lastPingTime}
+        onCheckConnection={onCheckConnection}
+      />
     </div>
   );
 };

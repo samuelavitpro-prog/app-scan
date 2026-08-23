@@ -142,3 +142,33 @@ export interface AppSettings {
 export type AppMode = 'desktop' | 'mobile-scanner';
 export type MobileScanTab = 'ai-capture' | 'rental-out' | 'rental-in' | 'quick-lookup';
 
+export type OfflineActionType =
+  | 'ADD_ITEM'
+  | 'UPDATE_ITEM'
+  | 'DELETE_ITEM'
+  | 'BATCH_DELETE'
+  | 'RENTAL_CHECKOUT'
+  | 'RENTAL_CHECKIN'
+  | 'UPDATE_SETTINGS'
+  | 'ADD_EMPLOYEE'
+  | 'UPDATE_EMPLOYEE'
+  | 'DELETE_EMPLOYEE';
+
+export interface QueuedOfflineAction {
+  id: string;
+  type: OfflineActionType;
+  description: string;
+  payload: any;
+  timestamp: string;
+  status: 'pending' | 'syncing' | 'synced' | 'error';
+  errorMessage?: string;
+  retryCount?: number;
+}
+
+export interface ConnectivityState {
+  isOnline: boolean;
+  isSimulatedOffline: boolean;
+  lastChecked: string;
+  pendingCount: number;
+}
+
