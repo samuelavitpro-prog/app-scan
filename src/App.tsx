@@ -17,6 +17,11 @@ import {
   Radio,
   Wifi,
   WifiOff,
+  ShieldCheck,
+  UserCheck,
+  LogOut,
+  KeyRound,
+  Lock,
 } from "lucide-react";
 import {
   InventoryItem,
@@ -28,11 +33,25 @@ import {
   Employee,
   ConnectedDevice,
   QueuedOfflineAction,
+  UserAccount,
+  StudioSpace,
+  TechnicianProfile,
+  ClientQuote,
+  DepotWarehouse,
+  NetworkDisplayScreen,
+  DisplayPlaylist,
+  ClientRecord,
+  SupplierRecord,
+  VenueRecord,
 } from "./types";
 import { DesktopDashboard } from "./components/DesktopDashboard";
 import { MobileScanner } from "./components/MobileScanner";
+import { CalendarPlanningDashboard } from "./components/CalendarPlanningDashboard";
+import { KioskDisplayReceiver } from "./components/KioskDisplayReceiver";
 import { ItemDetailModal } from "./components/ItemDetailModal";
 import { PhonePairingModal } from "./components/PhonePairingModal";
+import { EnterpriseAuthModal } from "./components/EnterpriseAuthModal";
+import { LoginPage } from "./components/LoginPage";
 import { playScanSuccessSound } from "./utils/audio";
 import {
   getStoredQueue,
@@ -50,9 +69,19 @@ export default function App() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [devices, setDevices] = useState<ConnectedDevice[]>([]);
+  const [studios, setStudios] = useState<StudioSpace[]>([]);
+  const [technicians, setTechnicians] = useState<TechnicianProfile[]>([]);
+  const [quotes, setQuotes] = useState<ClientQuote[]>([]);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [suppliers, setSuppliers] = useState<SupplierRecord[]>([]);
+  const [venues, setVenues] = useState<VenueRecord[]>([]);
+  const [depots, setDepots] = useState<DepotWarehouse[]>([]);
+  const [activeDepotId, setActiveDepotId] = useState<string>("DEP-01");
+  const [displays, setDisplays] = useState<NetworkDisplayScreen[]>([]);
+  const [playlists, setPlaylists] = useState<DisplayPlaylist[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
-    companyName: "StockVision IA & Logistique",
-    warehouseName: "Hub Central Paris-Nord",
+    companyName: "KROMA Audiovisuel & Logistique",
+    warehouseName: "Dépôt Central Paris-Nord",
     currency: "EUR (€)",
     cloudAI: {
       aiProvider: "gemini",
@@ -81,7 +110,21 @@ export default function App() {
     occupancyRate: 0,
   });
 
-  const [appMode, setAppMode] = useState<AppMode>("desktop");
+  const [appMode, setAppMode] = useState<AppMode>(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("display") || params.get("screen") || params.get("mode") === "kiosk-display" || params.get("mode") === "kiosk") {
+        return "kiosk-display";
+      }
+      if (params.get("mode") === "calendar-broadcast" || params.get("mode") === "calendar-tv") {
+        return "calendar-broadcast";
+      }
+      if (params.get("mode") === "mobile-scanner" || params.get("mode") === "scanner") {
+        return "mobile-scanner";
+      }
+    }
+    return "desktop";
+  });
   const [isSplitMode, setIsSplitMode] = useState<boolean>(false);
   const [selectedItemDetail, setSelectedItemDetail] = useState<InventoryItem | null>(null);
   const [showPairingModal, setShowPairingModal] = useState<boolean>(false);
@@ -89,6 +132,119 @@ export default function App() {
   const [driveSyncInfo, setDriveSyncInfo] = useState<any>(null);
   const [livePulse, setLivePulse] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState<boolean>(true);
+
+  // Enterprise Authentication State
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+
+  // Verify auth session token on mount
+  useEffect(() => {
+    const token = localStorage.getItem("sv_auth_token");
+    if (token) {
+      fetch("/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user) {
+            setCurrentUser(data.user);
+          } else {
+            localStorage.removeItem("sv_auth_token");
+            setCurrentUser(null);
+          }
+        })
+        .catch(() => {
+          // offline or server unreachable - keep cached user session if available
+        });
+    }
+  }, []);
+
+  const handleLoginSuccess = (user: UserAccount, token: string) => {
+    localStorage.setItem("sv_auth_token", token);
+    setCurrentUser(user);
+    if (user.activeDepotId) {
+      setActiveDepotId(user.activeDepotId);
+    } else if (user.defaultDepotId) {
+      setActiveDepotId(user.defaultDepotId);
+    } else if (user.assignedDepots && user.assignedDepots.length > 0) {
+      setActiveDepotId(user.assignedDepots[0]);
+    }
+    setShowAuthModal(false);
+    triggerLiveNotification(`Connecté : ${user.name} (${user.companyName})`);
+    fetchData();
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("sv_auth_token");
+    setCurrentUser(null);
+    triggerLiveNotification("Déconnexion réussie.");
+  };
+
+  const handleChangeActiveDepot = (depotId: string) => {
+    setActiveDepotId(depotId);
+    const targetDepot = depots.find((d) => d.id === depotId);
+    if (currentUser) {
+      setCurrentUser({
+        ...currentUser,
+        activeDepotId: depotId,
+        assignedWarehouse: targetDepot?.name || currentUser.assignedWarehouse,
+      });
+    }
+    triggerLiveNotification(`Dépôt actif basculé : ${targetDepot?.name || depotId}`);
+  };
+
+  const handleAddDepot = async (newDepot: Partial<DepotWarehouse>) => {
+    try {
+      const res = await fetch("/api/depots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDepot),
+      });
+      const data = await res.json();
+      if (data.depot) {
+        setDepots((prev) => [...prev, data.depot]);
+        triggerLiveNotification(`Dépôt créé : ${data.depot.name}`);
+        return true;
+      }
+    } catch (err) {
+      console.error("Error creating depot:", err);
+    }
+    return false;
+  };
+
+  const handleUpdateDepot = async (id: string, updates: Partial<DepotWarehouse>) => {
+    try {
+      const res = await fetch(`/api/depots/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.depot) {
+        setDepots((prev) => prev.map((d) => (d.id === id ? data.depot : d)));
+        triggerLiveNotification(`Dépôt mis à jour : ${data.depot.name}`);
+        return true;
+      }
+    } catch (err) {
+      console.error("Error updating depot:", err);
+    }
+    return false;
+  };
+
+  const handleDeleteDepot = async (id: string) => {
+    try {
+      const res = await fetch(`/api/depots/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setDepots((prev) => prev.filter((d) => d.id !== id));
+        triggerLiveNotification("Dépôt supprimé avec succès.");
+        return true;
+      }
+    } catch (err) {
+      console.error("Error deleting depot:", err);
+    }
+    return false;
+  };
 
   // Connectivity & Offline Queue States
   const [offlineQueue, setOfflineQueue] = useState<QueuedOfflineAction[]>([]);
@@ -281,14 +437,40 @@ export default function App() {
     }
     setIsSyncing(true);
     try {
-      const [itemsRes, rentalsRes, logsRes, statsRes, employeesRes, devicesRes, settingsRes] = await Promise.all([
-        fetch("/api/inventory").then((r) => r.json()),
-        fetch("/api/rentals").then((r) => r.json()),
-        fetch("/api/logs").then((r) => r.json()),
-        fetch("/api/stats").then((r) => r.json()),
-        fetch("/api/employees").then((r) => r.json()),
-        fetch("/api/devices").then((r) => r.json()),
-        fetch("/api/settings").then((r) => r.json()),
+      const [
+        itemsRes,
+        rentalsRes,
+        logsRes,
+        statsRes,
+        employeesRes,
+        devicesRes,
+        settingsRes,
+        studiosRes,
+        techniciansRes,
+        quotesRes,
+        depotsRes,
+        displaysRes,
+        playlistsRes,
+        clientsRes,
+        suppliersRes,
+        venuesRes,
+      ] = await Promise.all([
+        fetch("/api/inventory").then((r) => r.json()).catch(() => ({ items: [] })),
+        fetch("/api/rentals").then((r) => r.json()).catch(() => ({ rentals: [] })),
+        fetch("/api/logs").then((r) => r.json()).catch(() => ({ logs: [] })),
+        fetch("/api/stats").then((r) => r.json()).catch(() => null),
+        fetch("/api/employees").then((r) => r.json()).catch(() => ({ employees: [] })),
+        fetch("/api/devices").then((r) => r.json()).catch(() => ({ devices: [] })),
+        fetch("/api/settings").then((r) => r.json()).catch(() => ({ settings: null })),
+        fetch("/api/studios").then((r) => r.json()).catch(() => ({ studios: [] })),
+        fetch("/api/technicians").then((r) => r.json()).catch(() => ({ technicians: [] })),
+        fetch("/api/quotes").then((r) => r.json()).catch(() => ({ quotes: [] })),
+        fetch("/api/depots").then((r) => r.json()).catch(() => ({ depots: [] })),
+        fetch("/api/displays").then((r) => r.json()).catch(() => ({ displays: [] })),
+        fetch("/api/playlists").then((r) => r.json()).catch(() => ({ playlists: [] })),
+        fetch("/api/clients").then((r) => r.json()).catch(() => ({ clients: [] })),
+        fetch("/api/suppliers").then((r) => r.json()).catch(() => ({ suppliers: [] })),
+        fetch("/api/venues").then((r) => r.json()).catch(() => ({ venues: [] })),
       ]);
 
       if (itemsRes.items) setItems(itemsRes.items);
@@ -298,6 +480,15 @@ export default function App() {
       if (employeesRes.employees) setEmployees(employeesRes.employees);
       if (devicesRes.devices) setDevices(devicesRes.devices);
       if (settingsRes.settings) setSettings(settingsRes.settings);
+      if (studiosRes.studios) setStudios(studiosRes.studios);
+      if (techniciansRes.technicians) setTechnicians(techniciansRes.technicians);
+      if (quotesRes.quotes) setQuotes(quotesRes.quotes);
+      if (clientsRes.clients) setClients(clientsRes.clients);
+      if (suppliersRes.suppliers) setSuppliers(suppliersRes.suppliers);
+      if (venuesRes.venues) setVenues(venuesRes.venues);
+      if (depotsRes.depots && depotsRes.depots.length > 0) setDepots(depotsRes.depots);
+      if (displaysRes.displays) setDisplays(displaysRes.displays);
+      if (playlistsRes.playlists) setPlaylists(playlistsRes.playlists);
       setIsOnline(true);
       setLastPingTime(new Date().toISOString());
     } catch (err) {
@@ -378,6 +569,51 @@ export default function App() {
       eventSource.addEventListener("settings_updated", (e: MessageEvent) => {
         const data = JSON.parse(e.data);
         setSettings(data.payload);
+      });
+
+      eventSource.addEventListener("studios_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setStudios(data.payload);
+      });
+
+      eventSource.addEventListener("technicians_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setTechnicians(data.payload);
+      });
+
+      eventSource.addEventListener("quotes_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setQuotes(data.payload);
+      });
+
+      eventSource.addEventListener("clients_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setClients(data.payload);
+      });
+
+      eventSource.addEventListener("suppliers_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setSuppliers(data.payload);
+      });
+
+      eventSource.addEventListener("venues_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setVenues(data.payload);
+      });
+
+      eventSource.addEventListener("displays_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setDisplays(data.payload);
+      });
+
+      eventSource.addEventListener("playlists_updated", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        setPlaylists(data.payload);
+      });
+
+      eventSource.addEventListener("stock_alert_triggered", (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        triggerLiveNotification(`🚨 ${data.payload.message || "Alerte de stock critique détectée !"}`);
       });
     } catch (err) {
       console.warn("SSE connection error:", err);
@@ -559,6 +795,368 @@ export default function App() {
       }
       return false;
     } catch {
+      return false;
+    }
+  };
+
+  // Studio Spaces Handlers
+  const handleAddStudio = async (studio: Partial<StudioSpace>): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/studios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(studio),
+      });
+      const data = await res.json();
+      if (data.success && data.studio) {
+        setStudios((prev) => [...prev, data.studio]);
+        triggerLiveNotification(`Studio créé : ${data.studio.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur lors de la création du studio : " + err.message);
+      return false;
+    }
+  };
+
+  const handleUpdateStudio = async (id: string, updates: Partial<StudioSpace>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/studios/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success && data.studio) {
+        setStudios((prev) => prev.map((s) => (s.id === id ? data.studio : s)));
+        triggerLiveNotification(`Studio mis à jour : ${data.studio.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur lors de la mise à jour : " + err.message);
+      return false;
+    }
+  };
+
+  const handleDeleteStudio = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/studios/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setStudios((prev) => prev.filter((s) => s.id !== id));
+        triggerLiveNotification("Studio supprimé avec succès.");
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur lors de la suppression : " + err.message);
+      return false;
+    }
+  };
+
+  const handleBookStudio = async (studioId: string, bookingData: any): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/studios/${studioId}/book`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingData),
+      });
+      const data = await res.json();
+      if (data.success) {
+        triggerLiveNotification(`Réservation enregistrée pour ${data.booking.clientName}`);
+        fetchData();
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur de réservation : " + err.message);
+      return false;
+    }
+  };
+
+  // Technician Profiles Handlers
+  const handleAddTechnician = async (tech: Partial<TechnicianProfile>): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/technicians", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tech),
+      });
+      const data = await res.json();
+      if (data.success && data.technician) {
+        setTechnicians((prev) => [...prev, data.technician]);
+        triggerLiveNotification(`Technicien ajouté : ${data.technician.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  const handleUpdateTechnician = async (id: string, updates: Partial<TechnicianProfile>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/technicians/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success && data.technician) {
+        setTechnicians((prev) => prev.map((t) => (t.id === id ? data.technician : t)));
+        triggerLiveNotification(`Fiche mise à jour : ${data.technician.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  const handleDeleteTechnician = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/technicians/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setTechnicians((prev) => prev.filter((t) => t.id !== id));
+        triggerLiveNotification("Fiche technicien supprimée.");
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  // Quotes Handlers
+  const handleAddQuote = async (quote: Partial<ClientQuote>): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(quote),
+      });
+      const data = await res.json();
+      if (data.success && data.quote) {
+        setQuotes((prev) => [data.quote, ...prev]);
+        triggerLiveNotification(`Devis ${data.quote.quoteNumber} généré avec succès !`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur devis : " + err.message);
+      return false;
+    }
+  };
+
+  const handleUpdateQuote = async (id: string, updates: Partial<ClientQuote>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/quotes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success && data.quote) {
+        setQuotes((prev) => prev.map((q) => (q.id === id ? data.quote : q)));
+        triggerLiveNotification(`Devis ${data.quote.quoteNumber} actualisé.`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  const handleDeleteQuote = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/quotes/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setQuotes((prev) => prev.filter((q) => q.id !== id));
+        triggerLiveNotification("Devis supprimé.");
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  // Clients Directory Handlers
+  const handleAddClient = async (client: Partial<ClientRecord>): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(client),
+      });
+      const data = await res.json();
+      if (data.success && data.client) {
+        setClients((prev) => [data.client, ...prev]);
+        triggerLiveNotification(`Fiche client créée : ${data.client.companyName}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur client : " + err.message);
+      return false;
+    }
+  };
+
+  const handleUpdateClient = async (id: string, updates: Partial<ClientRecord>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/clients/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success && data.client) {
+        setClients((prev) => prev.map((c) => (c.id === id ? data.client : c)));
+        triggerLiveNotification(`Client mis à jour : ${data.client.companyName}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  const handleDeleteClient = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/clients/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setClients((prev) => prev.filter((c) => c.id !== id));
+        triggerLiveNotification("Fiche client supprimée.");
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  // Suppliers / Confrères Handlers
+  const handleAddSupplier = async (supplier: Partial<SupplierRecord>): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/suppliers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(supplier),
+      });
+      const data = await res.json();
+      if (data.success && data.supplier) {
+        setSuppliers((prev) => [data.supplier, ...prev]);
+        triggerLiveNotification(`Fiche confrère ajoutée : ${data.supplier.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur confrère : " + err.message);
+      return false;
+    }
+  };
+
+  const handleUpdateSupplier = async (id: string, updates: Partial<SupplierRecord>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/suppliers/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success && data.supplier) {
+        setSuppliers((prev) => prev.map((s) => (s.id === id ? data.supplier : s)));
+        triggerLiveNotification(`Confrère mis à jour : ${data.supplier.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  const handleDeleteSupplier = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/suppliers/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setSuppliers((prev) => prev.filter((s) => s.id !== id));
+        triggerLiveNotification("Fiche confrère supprimée.");
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  // Venues / Lieux & Salles de Réception Handlers (Locasyst)
+  const handleAddVenue = async (venue: Partial<VenueRecord>): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/venues", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(venue),
+      });
+      const data = await res.json();
+      if (data.success && data.venue) {
+        setVenues((prev) => [data.venue, ...prev]);
+        triggerLiveNotification(`Fiche lieu/salle créée : ${data.venue.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur lieu : " + err.message);
+      return false;
+    }
+  };
+
+  const handleUpdateVenue = async (id: string, updates: Partial<VenueRecord>): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/venues/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      const data = await res.json();
+      if (data.success && data.venue) {
+        setVenues((prev) => prev.map((v) => (v.id === id ? data.venue : v)));
+        triggerLiveNotification(`Lieu mis à jour : ${data.venue.name}`);
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
+      return false;
+    }
+  };
+
+  const handleDeleteVenue = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/venues/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setVenues((prev) => prev.filter((v) => v.id !== id));
+        triggerLiveNotification("Fiche lieu/salle supprimée.");
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      triggerLiveNotification("Erreur : " + err.message);
       return false;
     }
   };
@@ -909,6 +1507,27 @@ export default function App() {
     }
   };
 
+  // If in dedicated kiosk / digital signage receiver mode, render full-screen receiver directly
+  if (appMode === "kiosk-display") {
+    return (
+      <div className={darkMode ? "dark" : ""}>
+        <KioskDisplayReceiver onExitKiosk={() => setAppMode("desktop")} />
+      </div>
+    );
+  }
+
+  // If not logged in and not explicitly launched in standalone mobile scanner mode, show LoginPage
+  if (!currentUser && appMode !== "mobile-scanner") {
+    return (
+      <div className={darkMode ? "dark" : ""}>
+        <LoginPage
+          onLoginSuccess={handleLoginSuccess}
+          availableDepots={depots}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={darkMode ? "dark" : ""}>
       <div className="min-h-screen bg-[#07080e] text-[#e2e8f0] font-sans transition-colors selection:bg-indigo-500/30 selection:text-indigo-200">
@@ -920,98 +1539,34 @@ export default function App() {
           </div>
         )}
 
-        {/* Global Navigation Header */}
-        <header className="sticky top-0 z-40 bg-[#0a0c16]/90 backdrop-blur-xl border-b border-[#1c2035] px-4 sm:px-6 py-3 shadow-lg">
+        {/* Global Clean Navigation Header with Logo, User & Logout */}
+        <header className="sticky top-0 z-40 bg-[#121626]/90 backdrop-blur-xl border-b border-slate-700/60 px-4 sm:px-6 py-2.5 shadow-md">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-            {/* Brand Logo & Live status */}
+            {/* Brand Logo & Title */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 text-white flex items-center justify-center font-black shadow-lg shadow-indigo-600/30 border border-indigo-400/20">
-                <Layers className="w-5 h-5 text-indigo-100" />
+              <div className="w-9 h-9 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-indigo-600/30">
+                <Layers className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-extrabold text-base sm:text-lg text-white tracking-tight">
-                    StockVision <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">IA</span>
-                  </h1>
-                  <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 text-[10px] font-bold border border-emerald-800/80 shadow-xs">
-                    <Radio className="w-2.5 h-2.5 text-emerald-400 animate-pulse" /> Live Sync
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-1.5">
+                  <h1 className="font-extrabold text-base text-white tracking-tight">KROMA</h1>
+                  <span className="px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[10px] font-black tracking-wider uppercase">
+                    OS
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 hidden sm:block">
-                  Inventaire par Photo IA & Suivi des Locations en Temps Réel
-                </p>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/70 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 shadow-xs">
+                  <Radio className="w-2.5 h-2.5 text-emerald-400 animate-pulse" /> Live Sync
+                </span>
               </div>
             </div>
 
-            {/* Mode Controls: Desktop / Mobile / Split Simulator */}
+            {/* Actions & User Authentication Section */}
             <div className="flex items-center gap-2">
-              {/* Device Selector Pill */}
-              <div className="flex items-center p-1 bg-[#121524] rounded-xl text-xs font-semibold border border-[#20253e]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAppMode("desktop");
-                    setIsSplitMode(false);
-                  }}
-                  className={`py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition ${
-                    appMode === "desktop" && !isSplitMode
-                      ? "bg-indigo-600 text-white shadow-sm font-bold"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-[#1a1e33]"
-                  }`}
-                  title="Vue Bureau / Dashboard Logistique"
-                >
-                  <Monitor className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Bureau</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAppMode("mobile-scanner");
-                    setIsSplitMode(false);
-                  }}
-                  className={`py-1.5 px-3 rounded-lg flex items-center gap-1.5 transition ${
-                    appMode === "mobile-scanner" && !isSplitMode
-                      ? "bg-indigo-600 text-white shadow-sm font-bold"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-[#1a1e33]"
-                  }`}
-                  title="Vue Scanner Mobile (Caméra & Départ/Retour)"
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline">Scanner Mobile</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsSplitMode(!isSplitMode)}
-                  className={`py-1.5 px-2.5 rounded-lg flex items-center gap-1.5 transition ${
-                    isSplitMode
-                      ? "bg-violet-600 text-white shadow-sm font-bold"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-[#1a1e33]"
-                  }`}
-                  title="Simulateur Split : Bureau + Scanner Mobile côte à côte"
-                >
-                  <Columns className="w-3.5 h-3.5" />
-                  <span className="hidden lg:inline">Vue Duo</span>
-                </button>
-              </div>
-
-              {/* Pair Real Phone Button */}
-              <button
-                type="button"
-                onClick={() => setShowPairingModal(true)}
-                className="p-2 rounded-xl border border-[#232842] bg-[#121524] text-slate-200 hover:bg-[#181c30] hover:border-indigo-500/50 text-xs font-semibold flex items-center gap-1.5 transition shadow-xs"
-                title="Scanner le QR Code pour ouvrir sur smartphone"
-              >
-                <QrCode className="w-4 h-4 text-indigo-400" />
-                <span className="hidden sm:inline">Connecter Smartphone</span>
-              </button>
-
               {/* Refresh / Sync Button */}
               <button
                 type="button"
                 onClick={fetchData}
-                className={`p-2 rounded-xl border border-[#232842] bg-[#121524] text-slate-300 hover:text-white hover:bg-[#181c30] transition shadow-xs ${
+                className={`p-2 rounded-xl border border-slate-700/70 bg-[#1c2237] text-slate-300 hover:text-white hover:bg-[#242c48] transition shadow-xs ${
                   isSyncing ? "animate-spin text-indigo-400" : ""
                 }`}
                 title="Recharger les données"
@@ -1019,23 +1574,95 @@ export default function App() {
                 <RefreshCw className="w-4 h-4" />
               </button>
 
-              {/* Dark mode toggle */}
-              <button
-                type="button"
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-xl border border-[#232842] bg-[#121524] text-slate-300 hover:text-white hover:bg-[#181c30] transition shadow-xs"
-                title="Mode thème"
-              >
-                {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
-              </button>
+              {/* Enterprise User Profile & Logout */}
+              {currentUser ? (
+                <div className="flex items-center gap-2 pl-1 border-l border-slate-700/60">
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthModal(true)}
+                    className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-indigo-500/40 bg-[#1c2237] hover:bg-[#242c48] text-xs font-semibold flex items-center gap-2 transition text-slate-100 shadow-xs"
+                    title={`Connecté : ${currentUser.name} (${currentUser.companyName})`}
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold text-white uppercase">
+                      {currentUser.name.charAt(0)}
+                    </div>
+                    <div className="hidden md:flex flex-col text-left leading-tight">
+                      <span className="text-xs font-bold text-white truncate max-w-[120px]">
+                        {currentUser.name}
+                      </span>
+                      <span className="text-[10px] text-slate-400 truncate max-w-[120px]">
+                        {depots.find((d) => d.id === activeDepotId)?.name || currentUser.companyName}
+                      </span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="py-1.5 px-3 rounded-xl border border-rose-500/40 bg-rose-950/60 text-rose-300 hover:bg-rose-900/80 hover:text-rose-100 text-xs font-bold flex items-center gap-1.5 transition shadow-xs"
+                    title="Se déconnecter de la session"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                    <span className="hidden sm:inline">Déconnexion</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-3.5 py-1.5 rounded-xl border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                  title="Se connecter"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Connexion</span>
+                </button>
+              )}
             </div>
           </div>
         </header>
 
         {/* Main Content Body */}
-        <main className="max-w-7xl mx-auto p-4 sm:p-6">
-          {/* Split Mode: Desktop & Mobile Scanner in real-time side-by-side! */}
-          {isSplitMode ? (
+        <main className="max-w-7xl mx-auto p-3 sm:p-5">
+          {appMode === "calendar-broadcast" ? (
+            /* Dedicated Second-Screen Wallboard / Régie Broadcast Mode */
+            <div className="space-y-4">
+              <div className="flex items-center justify-between bg-[#121526] border border-indigo-500/40 rounded-2xl p-3.5 shadow-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center text-white font-bold">
+                    <Monitor className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>Régie Déportée • Affichage Écran Dédié</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 text-[10px] font-bold border border-emerald-800 animate-pulse">
+                        LIVE SYNC ACTIVE
+                      </span>
+                    </h2>
+                    <p className="text-[11px] text-slate-400">
+                      Ce mode est optimisé pour être projeté sur un second moniteur ou écran mural en permanence.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setAppMode("desktop")}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700"
+                >
+                  Retour au Bureau
+                </button>
+              </div>
+
+              <CalendarPlanningDashboard
+                quotes={quotes}
+                studios={studios}
+                technicians={technicians}
+                items={items}
+                depots={depots}
+                activeDepotId={activeDepotId}
+              />
+            </div>
+          ) : isSplitMode ? (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Column: Mobile Scanner in realistic smartphone frame */}
               <div className="lg:col-span-4 bg-[#090b14] p-4 rounded-3xl border-2 border-[#232842] shadow-2xl">
@@ -1048,9 +1675,15 @@ export default function App() {
                 <MobileScanner
                   items={items}
                   rentals={rentals}
+                  quotes={quotes}
+                  displays={displays}
+                  playlists={playlists}
+                  currentUser={currentUser}
+                  settings={settings}
                   onAddNewItem={handleAddNewItem}
                   onRentalCheckout={handleRentalCheckout}
                   onRentalCheckin={handleRentalCheckin}
+                  onUpdateQuote={handleUpdateQuote}
                   isSyncing={isSyncing}
                   onRefresh={fetchData}
                 />
@@ -1066,6 +1699,29 @@ export default function App() {
                   settings={settings}
                   employees={employees}
                   devices={devices}
+                  currentUser={currentUser}
+                  depots={depots}
+                  activeDepotId={activeDepotId}
+                  onChangeActiveDepot={handleChangeActiveDepot}
+                  onLogout={handleLogout}
+                  onAddDepot={handleAddDepot}
+                  onUpdateDepot={handleUpdateDepot}
+                  onDeleteDepot={handleDeleteDepot}
+                  studios={studios}
+                  technicians={technicians}
+                  quotes={quotes}
+                  clients={clients}
+                  suppliers={suppliers}
+                  venues={venues}
+                  onAddClient={handleAddClient}
+                  onUpdateClient={handleUpdateClient}
+                  onDeleteClient={handleDeleteClient}
+                  onAddSupplier={handleAddSupplier}
+                  onUpdateSupplier={handleUpdateSupplier}
+                  onDeleteSupplier={handleDeleteSupplier}
+                  onAddVenue={handleAddVenue}
+                  onUpdateVenue={handleUpdateVenue}
+                  onDeleteVenue={handleDeleteVenue}
                   onDeleteItem={handleDeleteItem}
                   onUpdateItem={handleUpdateItem}
                   onManualAddItem={handleAddNewItem}
@@ -1083,7 +1739,27 @@ export default function App() {
                   onDeleteEmployee={handleDeleteEmployee}
                   onRevokeDevice={handleRevokeDevice}
                   onRegisterDevice={handleRegisterDevice}
+                  onAddStudio={handleAddStudio}
+                  onUpdateStudio={handleUpdateStudio}
+                  onDeleteStudio={handleDeleteStudio}
+                  onBookStudio={handleBookStudio}
+                  onAddTechnician={handleAddTechnician}
+                  onUpdateTechnician={handleUpdateTechnician}
+                  onDeleteTechnician={handleDeleteTechnician}
+                  onAddQuote={handleAddQuote}
+                  onUpdateQuote={handleUpdateQuote}
+                  onDeleteQuote={handleDeleteQuote}
                   onRefresh={fetchData}
+                  onRefreshData={fetchData}
+                  onTriggerAuthModal={() => setShowAuthModal(true)}
+                  onOpenPairingModal={() => setShowPairingModal(true)}
+                  appMode={appMode}
+                  onSetAppMode={(m) => {
+                    setIsSplitMode(false);
+                    setAppMode(m);
+                  }}
+                  isSplitMode={isSplitMode}
+                  onToggleSplitMode={() => setIsSplitMode(!isSplitMode)}
                   isSyncing={isSyncing}
                   driveSyncInfo={driveSyncInfo}
                   isOnline={isOnline}
@@ -1096,6 +1772,8 @@ export default function App() {
                   onCheckConnection={checkConnection}
                   lastPingTime={lastPingTime}
                   onBatchDelete={handleBatchDelete}
+                  darkMode={darkMode}
+                  onToggleDarkMode={() => setDarkMode(!darkMode)}
                 />
               </div>
             </div>
@@ -1109,6 +1787,29 @@ export default function App() {
               settings={settings}
               employees={employees}
               devices={devices}
+              currentUser={currentUser}
+              depots={depots}
+              activeDepotId={activeDepotId}
+              onChangeActiveDepot={handleChangeActiveDepot}
+              onLogout={handleLogout}
+              onAddDepot={handleAddDepot}
+              onUpdateDepot={handleUpdateDepot}
+              onDeleteDepot={handleDeleteDepot}
+              studios={studios}
+              technicians={technicians}
+              quotes={quotes}
+              clients={clients}
+              suppliers={suppliers}
+              venues={venues}
+              onAddClient={handleAddClient}
+              onUpdateClient={handleUpdateClient}
+              onDeleteClient={handleDeleteClient}
+              onAddSupplier={handleAddSupplier}
+              onUpdateSupplier={handleUpdateSupplier}
+              onDeleteSupplier={handleDeleteSupplier}
+              onAddVenue={handleAddVenue}
+              onUpdateVenue={handleUpdateVenue}
+              onDeleteVenue={handleDeleteVenue}
               onDeleteItem={handleDeleteItem}
               onUpdateItem={handleUpdateItem}
               onManualAddItem={handleAddNewItem}
@@ -1123,7 +1824,27 @@ export default function App() {
               onDeleteEmployee={handleDeleteEmployee}
               onRevokeDevice={handleRevokeDevice}
               onRegisterDevice={handleRegisterDevice}
+              onAddStudio={handleAddStudio}
+              onUpdateStudio={handleUpdateStudio}
+              onDeleteStudio={handleDeleteStudio}
+              onBookStudio={handleBookStudio}
+              onAddTechnician={handleAddTechnician}
+              onUpdateTechnician={handleUpdateTechnician}
+              onDeleteTechnician={handleDeleteTechnician}
+              onAddQuote={handleAddQuote}
+              onUpdateQuote={handleUpdateQuote}
+              onDeleteQuote={handleDeleteQuote}
               onRefresh={fetchData}
+              onRefreshData={fetchData}
+              onTriggerAuthModal={() => setShowAuthModal(true)}
+              onOpenPairingModal={() => setShowPairingModal(true)}
+              appMode={appMode}
+              onSetAppMode={(m) => {
+                setIsSplitMode(false);
+                setAppMode(m);
+              }}
+              isSplitMode={isSplitMode}
+              onToggleSplitMode={() => setIsSplitMode(!isSplitMode)}
               isSyncing={isSyncing}
               driveSyncInfo={driveSyncInfo}
               isOnline={isOnline}
@@ -1136,16 +1857,41 @@ export default function App() {
               onCheckConnection={checkConnection}
               lastPingTime={lastPingTime}
               onBatchDelete={handleBatchDelete}
+              darkMode={darkMode}
+              onToggleDarkMode={() => setDarkMode(!darkMode)}
             />
           ) : (
-            /* Single Mobile Scanner View */
-            <div className="max-w-md mx-auto">
+            /* Single Mobile Scanner View with quick return header */
+            <div className="max-w-md mx-auto space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#161a2b] border border-slate-700/60 shadow-md">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                    K
+                  </div>
+                  <span className="text-xs font-bold text-white">Scanner Mobile</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAppMode("desktop")}
+                  className="py-1 px-2.5 rounded-xl bg-[#1f253d] hover:bg-[#242c48] border border-slate-600/50 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition"
+                >
+                  <Monitor className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Vue Bureau</span>
+                </button>
+              </div>
+
               <MobileScanner
                 items={items}
                 rentals={rentals}
+                quotes={quotes}
+                displays={displays}
+                playlists={playlists}
+                currentUser={currentUser}
+                settings={settings}
                 onAddNewItem={handleAddNewItem}
                 onRentalCheckout={handleRentalCheckout}
                 onRentalCheckin={handleRentalCheckin}
+                onUpdateQuote={handleUpdateQuote}
                 isSyncing={isSyncing}
                 onRefresh={fetchData}
               />
@@ -1173,6 +1919,14 @@ export default function App() {
             }}
           />
         )}
+
+        {/* Enterprise Authentication & Security Modal */}
+        <EnterpriseAuthModal
+          isOpen={showAuthModal || (Boolean(settings.requireEnterpriseLogin) && !currentUser)}
+          onLoginSuccess={handleLoginSuccess}
+          onClose={() => setShowAuthModal(false)}
+          canDismiss={!(settings.requireEnterpriseLogin && !currentUser)}
+        />
       </div>
     </div>
   );

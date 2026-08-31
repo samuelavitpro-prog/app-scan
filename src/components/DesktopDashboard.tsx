@@ -39,6 +39,17 @@ import {
   ChevronDown,
   Wifi,
   WifiOff,
+  Building2,
+  ScanLine,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Command,
+  SlidersHorizontal,
+  Zap,
+  ChevronRight,
+  Radio,
+  Truck,
+  ArrowRight,
 } from "lucide-react";
 import {
   InventoryItem,
@@ -49,10 +60,32 @@ import {
   Employee,
   ConnectedDevice,
   QueuedOfflineAction,
+  UserAccount,
+  StudioSpace,
+  TechnicianProfile,
+  ClientQuote,
+  MainAppNavTab,
 } from "../types";
 import { SettingsDashboard } from "./SettingsDashboard";
 import { ConnectivityIndicator } from "./ConnectivityIndicator";
 import { SyncQueueModal } from "./SyncQueueModal";
+import { InvoiceScannerModal } from "./InvoiceScannerModal";
+import { StudiosDashboard } from "./StudiosDashboard";
+import { TechniciansDashboard } from "./TechniciansDashboard";
+import { QuotesDashboard } from "./QuotesDashboard";
+import { CommandPaletteModal } from "./CommandPaletteModal";
+import { DirectoryDashboard } from "./DirectoryDashboard";
+import { MainSidebar } from "./MainSidebar";
+import { RentalsDossiersDashboard } from "./RentalsDossiersDashboard";
+import { InvoicesDashboard } from "./InvoicesDashboard";
+import { CalendarPlanningDashboard } from "./CalendarPlanningDashboard";
+import { FlightCasesDashboard } from "./FlightCasesDashboard";
+import { MaintenanceSAVDashboard } from "./MaintenanceSAVDashboard";
+import { NetworkDisplaysDashboard } from "./NetworkDisplaysDashboard";
+import { PlanGateGuard } from "./PlanGateGuard";
+import { PlanUpgradeModal } from "./PlanUpgradeModal";
+import { canAccessModule } from "../utils/subscriptionPlans";
+import { DepotWarehouse, SubscriptionTier, ClientRecord, SupplierRecord, VenueRecord } from "../types";
 
 interface DesktopDashboardProps {
   items: InventoryItem[];
@@ -62,6 +95,26 @@ interface DesktopDashboardProps {
   settings: AppSettings;
   employees: Employee[];
   devices: ConnectedDevice[];
+  currentUser?: UserAccount | null;
+  depots?: DepotWarehouse[];
+  activeDepotId?: string;
+  onChangeActiveDepot?: (depotId: string) => void;
+  onLogout?: () => void;
+  studios?: StudioSpace[];
+  technicians?: TechnicianProfile[];
+  quotes?: ClientQuote[];
+  clients?: ClientRecord[];
+  suppliers?: SupplierRecord[];
+  venues?: VenueRecord[];
+  onAddClient?: (client: Partial<ClientRecord>) => Promise<boolean>;
+  onUpdateClient?: (id: string, updates: Partial<ClientRecord>) => Promise<boolean>;
+  onDeleteClient?: (id: string) => Promise<boolean>;
+  onAddSupplier?: (supplier: Partial<SupplierRecord>) => Promise<boolean>;
+  onUpdateSupplier?: (id: string, updates: Partial<SupplierRecord>) => Promise<boolean>;
+  onDeleteSupplier?: (id: string) => Promise<boolean>;
+  onAddVenue?: (venue: Partial<VenueRecord>) => Promise<boolean>;
+  onUpdateVenue?: (id: string, updates: Partial<VenueRecord>) => Promise<boolean>;
+  onDeleteVenue?: (id: string) => Promise<boolean>;
   onDeleteItem: (id: string) => Promise<boolean>;
   onUpdateItem: (id: string, updates: Partial<InventoryItem>) => Promise<boolean>;
   onManualAddItem: (item: Partial<InventoryItem>) => Promise<boolean>;
@@ -76,7 +129,28 @@ interface DesktopDashboardProps {
   onDeleteEmployee: (id: string) => Promise<boolean>;
   onRevokeDevice: (id: string) => Promise<boolean>;
   onRegisterDevice: (device: Partial<ConnectedDevice>) => Promise<boolean>;
+  onAddDepot?: (depot: Partial<DepotWarehouse>) => Promise<boolean>;
+  onUpdateDepot?: (id: string, updates: Partial<DepotWarehouse>) => Promise<boolean>;
+  onDeleteDepot?: (id: string) => Promise<boolean>;
+  onAddStudio?: (studio: Partial<StudioSpace>) => Promise<boolean>;
+  onUpdateStudio?: (id: string, updates: Partial<StudioSpace>) => Promise<boolean>;
+  onDeleteStudio?: (id: string) => Promise<boolean>;
+  onBookStudio?: (studioId: string, bookingData: any) => Promise<boolean>;
+  onAddTechnician?: (tech: Partial<TechnicianProfile>) => Promise<boolean>;
+  onUpdateTechnician?: (id: string, updates: Partial<TechnicianProfile>) => Promise<boolean>;
+  onDeleteTechnician?: (id: string) => Promise<boolean>;
+  onAddQuote?: (quote: Partial<ClientQuote>) => Promise<boolean>;
+  onUpdateQuote?: (id: string, updates: Partial<ClientQuote>) => Promise<boolean>;
+  onDeleteQuote?: (id: string) => Promise<boolean>;
+  onImportInvoiceItems?: (items: any[]) => Promise<boolean>;
   onRefresh?: () => void;
+  onRefreshData?: () => Promise<void>;
+  onTriggerAuthModal?: () => void;
+  onOpenPairingModal?: () => void;
+  appMode?: string;
+  onSetAppMode?: (mode: "desktop" | "mobile-scanner" | "calendar-broadcast") => void;
+  isSplitMode?: boolean;
+  onToggleSplitMode?: () => void;
   isSyncing: boolean;
   driveSyncInfo: any;
   isOnline?: boolean;
@@ -89,16 +163,38 @@ interface DesktopDashboardProps {
   onCheckConnection?: () => Promise<void>;
   lastPingTime?: string;
   onBatchDelete?: (ids: string[]) => Promise<boolean>;
+  darkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
 export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
-  items,
-  rentals,
-  logs,
+  items = [],
+  rentals = [],
+  logs = [],
   stats,
   settings,
-  employees,
-  devices,
+  employees = [],
+  devices = [],
+  currentUser = null,
+  depots = [],
+  activeDepotId = "DEP-01",
+  onChangeActiveDepot = () => {},
+  onLogout = () => {},
+  studios = [],
+  technicians = [],
+  quotes = [],
+  clients = [],
+  suppliers = [],
+  venues = [],
+  onAddClient = async () => false,
+  onUpdateClient = async () => false,
+  onDeleteClient = async () => false,
+  onAddSupplier = async () => false,
+  onUpdateSupplier = async () => false,
+  onDeleteSupplier = async () => false,
+  onAddVenue = async () => false,
+  onUpdateVenue = async () => false,
+  onDeleteVenue = async () => false,
   onDeleteItem,
   onUpdateItem,
   onManualAddItem,
@@ -113,7 +209,28 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   onDeleteEmployee,
   onRevokeDevice,
   onRegisterDevice,
+  onAddDepot,
+  onUpdateDepot,
+  onDeleteDepot,
+  onAddStudio = async () => false,
+  onUpdateStudio = async () => false,
+  onDeleteStudio = async () => false,
+  onBookStudio = async () => false,
+  onAddTechnician = async () => false,
+  onUpdateTechnician = async () => false,
+  onDeleteTechnician = async () => false,
+  onAddQuote = async () => false,
+  onUpdateQuote = async () => false,
+  onDeleteQuote = async () => false,
+  onImportInvoiceItems,
   onRefresh,
+  onRefreshData,
+  onTriggerAuthModal,
+  onOpenPairingModal,
+  appMode,
+  onSetAppMode,
+  isSplitMode,
+  onToggleSplitMode,
   isSyncing,
   driveSyncInfo,
   isOnline = true,
@@ -126,15 +243,52 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   onCheckConnection = async () => {},
   lastPingTime,
   onBatchDelete,
+  darkMode = true,
+  onToggleDarkMode,
 }) => {
-  const [activeTab, setActiveTab] = useState<"inventory" | "rentals" | "logs" | "cloud" | "settings">("inventory");
+  const [activeTab, setActiveTab] = useState<MainAppNavTab>("dashboard");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "available" | "rented" | "low-stock">("all");
   const [showManualAddModal, setShowManualAddModal] = useState<boolean>(false);
+  const [showInvoiceScannerModal, setShowInvoiceScannerModal] = useState<boolean>(false);
   const [showDepartureModal, setShowDepartureModal] = useState<boolean>(false);
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [showSyncQueueModal, setShowSyncQueueModal] = useState<boolean>(false);
+  const [showCommandPalette, setShowCommandPalette] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [showQuickActionsDropdown, setShowQuickActionsDropdown] = useState<boolean>(false);
+  const [quotePrefillTech, setQuotePrefillTech] = useState<TechnicianProfile | null>(null);
+  const [quotePrefillStudio, setQuotePrefillStudio] = useState<StudioSpace | null>(null);
+  const [quotePrefillClient, setQuotePrefillClient] = useState<ClientRecord | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState<boolean>(false);
+  const [upgradeTargetTier, setUpgradeTargetTier] = useState<SubscriptionTier>("pro");
+
+  // Handler to open Plan Upgrade Modal
+  const handleOpenUpgradeModal = (recommendedTier: SubscriptionTier = "pro") => {
+    setUpgradeTargetTier(recommendedTier);
+    setShowUpgradeModal(true);
+  };
+
+  // Module access checks
+  const studiosAccess = canAccessModule("studios", settings.subscription);
+  const techniciansAccess = canAccessModule("technicians", settings.subscription);
+  const invoicesAccess = canAccessModule("invoices", settings.subscription);
+  const flightcasesAccess = canAccessModule("flightcases", settings.subscription);
+  const maintenanceAccess = canAccessModule("maintenance", settings.subscription);
+  const displaysAccess = canAccessModule("displays", settings.subscription);
+
+  // Global Command Palette Shortcut Listener (Cmd+K / Ctrl+K)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Batch selection in inventory
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
@@ -180,8 +334,21 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
     setTimeout(() => setActionFeedback(null), 4000);
   };
 
+  const safeItems = items || [];
+  const safeRentals = rentals || [];
+  const safeQuotes = quotes || [];
+  const safeStudios = studios || [];
+  const safeTechnicians = technicians || [];
+  const safeClients = clients || [];
+  const safeSuppliers = suppliers || [];
+  const safeVenues = venues || [];
+  const safeLogs = logs || [];
+  const safeDepots = depots || [];
+  const safeEmployees = employees || [];
+  const safeDevices = devices || [];
+
   // Filter items
-  const filteredItems = items.filter((item) => {
+  const filteredItems = safeItems.filter((item) => {
     const matchesQuery =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -198,7 +365,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
     return matchesQuery && matchesCategory && matchesStatus;
   });
 
-  const categories = Array.from(new Set(items.map((i) => i.category)));
+  const categories = Array.from(new Set(safeItems.map((i) => i.category)));
 
   // Batch Select Handlers
   const handleToggleSelectAll = () => {
@@ -259,11 +426,11 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
     let datasetToExport: InventoryItem[] = [];
 
     if (targetScope === "selected" && selectedItemIds.length > 0) {
-      datasetToExport = items.filter((i) => selectedItemIds.includes(i.id));
+      datasetToExport = safeItems.filter((i) => selectedItemIds.includes(i.id));
     } else if (targetScope === "filtered") {
       datasetToExport = filteredItems;
     } else {
-      datasetToExport = items;
+      datasetToExport = safeItems;
     }
 
     if (datasetToExport.length === 0) {
@@ -604,7 +771,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   };
 
   return (
-    <div id="desktop-dashboard" className="w-full flex flex-col space-y-6">
+    <div id="desktop-dashboard" className="w-full flex flex-col space-y-5">
       {/* Persistent Offline & Sync Status Banner */}
       <ConnectivityIndicator
         isOnline={isOnline}
@@ -619,7 +786,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
       {/* Toast feedback banner */}
       {actionFeedback && (
         <div
-          className={`p-3.5 rounded-2xl text-xs font-bold flex items-center justify-between shadow-lg transition-all animate-bounce ${
+          className={`p-3.5 rounded-2xl text-xs font-bold flex items-center justify-between shadow-xl transition-all animate-bounce ${
             actionFeedback.type === "success"
               ? "bg-emerald-600 text-white"
               : "bg-rose-600 text-white"
@@ -643,199 +810,145 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
         </div>
       )}
 
-      {/* Top Metric KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-        {/* KPI 1: Total Stock & References */}
-        <div className="p-4 rounded-2xl bg-[#0e111d] border border-[#1e233b] hover:border-[#2e3658] shadow-sm flex flex-col justify-between transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Catalogue & Pièces
-            </span>
-            <div className="p-2 rounded-xl bg-indigo-950/70 border border-indigo-500/20 text-indigo-400">
-              <Package className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <span className="text-2xl font-bold text-white">
-              {stats.totalStockItems}
-            </span>
-            <span className="text-xs text-slate-400 ml-1.5 font-medium">
-              en {stats.totalProducts} réf.
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 2: Available Stock in Real-Time */}
-        <div className="p-4 rounded-2xl bg-[#0e111d] border border-[#1e233b] hover:border-emerald-500/30 shadow-sm flex flex-col justify-between transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-              Disponible en Rayon
-            </span>
-            <div className="p-2 rounded-xl bg-emerald-950/70 border border-emerald-500/20 text-emerald-400">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <span className="text-2xl font-bold text-emerald-400">
-              {stats.totalAvailable}
-            </span>
-            <span className="text-xs text-slate-400 ml-1.5 font-medium">
-              unités prêtes
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 3: Out on Rent / Movement */}
-        <div className="p-4 rounded-2xl bg-[#0e111d] border border-[#1e233b] hover:border-amber-500/30 shadow-sm flex flex-col justify-between transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
-              En Location / Sortie
-            </span>
-            <div className="p-2 rounded-xl bg-amber-950/70 border border-amber-500/20 text-amber-400">
-              <ArrowUpRight className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <span className="text-2xl font-bold text-amber-400">
-              {stats.totalRented}
-            </span>
-            <span className="text-xs text-slate-400 ml-1.5 font-medium">
-              sur {stats.activeRentalsCount} chantiers
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 4: Overdue & Low Stock Alerts */}
-        <div className="p-4 rounded-2xl bg-[#0e111d] border border-[#1e233b] hover:border-rose-500/30 shadow-sm flex flex-col justify-between transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-400">
-              Alertes Logistique
-            </span>
-            <div className="p-2 rounded-xl bg-rose-950/70 border border-rose-500/20 text-rose-400">
-              <AlertTriangle className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-rose-400">
-              {stats.overdueCount}
-            </span>
-            <span className="text-xs text-slate-400 font-medium">
-              retards • {stats.lowStockCount} bas
-            </span>
-          </div>
-        </div>
-
-        {/* KPI 5: Total Value Asset */}
-        <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-[#0e111d] border border-[#1e233b] hover:border-indigo-500/30 shadow-sm flex flex-col justify-between transition">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Valeur du Parc
-            </span>
-            <div className="p-2 rounded-xl bg-[#171c2e] text-slate-300">
-              <Euro className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <span className="text-xl font-bold text-white">
-              {stats.totalInventoryValue.toLocaleString("fr-FR")} €
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Desktop Tabs & Actions Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#1e233b] pb-3">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto">
+      {/* TOP COMMAND BAR: Global Search (Spotlight / Cmd+K), Quick Action Launcher & Connectivity */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 bg-[#161a2b] rounded-2xl border border-slate-700/60 shadow-md">
+        {/* Spotlight Universal Search trigger */}
+        <div className="flex items-center gap-2 flex-1 max-w-xl">
           <button
-            id="desktop-tab-inventory"
+            id="global-spotlight-btn"
             type="button"
-            onClick={() => setActiveTab("inventory")}
-            className={`py-2 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
-              activeTab === "inventory"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                : "bg-[#111422] border border-[#20253c] text-slate-300 hover:text-white hover:bg-[#181d30]"
-            }`}
+            onClick={() => setShowCommandPalette(true)}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#1c2237] hover:bg-[#222942] border border-slate-750 hover:border-indigo-500/60 text-slate-400 hover:text-slate-200 transition group text-left shadow-inner"
           >
-            <Package className="w-3.5 h-3.5" />
-            Inventaire & Stock ({items.length})
-          </button>
-
-          <button
-            id="desktop-tab-rentals"
-            type="button"
-            onClick={() => setActiveTab("rentals")}
-            className={`py-2 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
-              activeTab === "rentals"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                : "bg-[#111422] border border-[#20253c] text-slate-300 hover:text-white hover:bg-[#181d30]"
-            }`}
-          >
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            Suivi Locations & Retours
-            {stats.activeRentalsCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[10px] font-bold">
-                {stats.activeRentalsCount}
+            <div className="flex items-center gap-2.5">
+              <Search className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition" />
+              <span className="text-xs font-medium text-slate-300">
+                Rechercher matériel, technicien, studio, devis...
               </span>
-            )}
-          </button>
-
-          <button
-            id="desktop-tab-logs"
-            type="button"
-            onClick={() => setActiveTab("logs")}
-            className={`py-2 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
-              activeTab === "logs"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                : "bg-[#111422] border border-[#20253c] text-slate-300 hover:text-white hover:bg-[#181d30]"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            Journal Scans Temps Réel ({logs.length})
-          </button>
-
-          <button
-            id="desktop-tab-cloud"
-            type="button"
-            onClick={() => setActiveTab("cloud")}
-            className={`py-2 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
-              activeTab === "cloud"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                : "bg-[#111422] border border-[#20253c] text-slate-300 hover:text-white hover:bg-[#181d30]"
-            }`}
-          >
-            <Cloud className="w-3.5 h-3.5 text-sky-400" />
-            Google Drive & Sync Cloud
-          </button>
-
-          <button
-            id="desktop-tab-settings"
-            type="button"
-            onClick={() => setActiveTab("settings")}
-            className={`py-2 px-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition ${
-              activeTab === "settings"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 font-bold"
-                : "bg-[#111422] border border-[#20253c] text-slate-300 hover:text-white hover:bg-[#181d30]"
-            }`}
-          >
-            <Settings className="w-3.5 h-3.5 text-amber-400" />
-            Paramètres, IA & Équipe
+            </div>
+            <span className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-lg bg-[#242c48] text-indigo-300 border border-slate-700">
+              <Command className="w-3 h-3" /> K
+            </span>
           </button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        {/* Action Controls & Fast Launcher */}
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end relative">
+          {/* Quick Action Dropdown Trigger */}
+          <div className="relative">
+            <button
+              id="quick-actions-launcher-btn"
+              type="button"
+              onClick={() => setShowQuickActionsDropdown(!showQuickActionsDropdown)}
+              className="py-2.5 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition active:scale-95"
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+              <span>+ Action Rapide</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showQuickActionsDropdown ? "rotate-180" : ""}`} />
+            </button>
+
+            {showQuickActionsDropdown && (
+              <div
+                className="absolute right-0 mt-2 w-64 bg-[#161a2b] border border-slate-700 rounded-2xl shadow-2xl p-1.5 z-50 animate-fadeIn"
+                onClick={() => setShowQuickActionsDropdown(false)}
+              >
+                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Créations & Départs
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("quotes");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-[#202742] transition text-left"
+                >
+                  <FileText className="w-4 h-4 text-amber-400" />
+                  <span>Nouveau Devis / Facture</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDepartureModal(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-[#202742] transition text-left"
+                >
+                  <ArrowUpRight className="w-4 h-4 text-purple-400" />
+                  <span>Nouveau Bon de Sortie</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowInvoiceScannerModal(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-[#202742] transition text-left"
+                >
+                  <ScanLine className="w-4 h-4 text-indigo-400" />
+                  <span>Scanner Facture / Devis IA</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowManualAddModal(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-[#202742] transition text-left"
+                >
+                  <Package className="w-4 h-4 text-emerald-400" />
+                  <span>Ajouter Matériel au Stock</span>
+                </button>
+
+                <div className="my-1 border-t border-slate-700/60" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("studios");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-[#202742] transition text-left"
+                >
+                  <Building2 className="w-4 h-4 text-cyan-400" />
+                  <span>Gérer Studios & Plateaux</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("technicians");
+                  }}
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-[#202742] transition text-left"
+                >
+                  <Users className="w-4 h-4 text-emerald-400" />
+                  <span>Gérer Personnel & Crew</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Scan Invoice Button */}
+          <button
+            id="desktop-scan-invoice-btn"
+            type="button"
+            onClick={() => setShowInvoiceScannerModal(true)}
+            className="py-2.5 px-3 rounded-xl border border-indigo-500/40 bg-[#1c2237] hover:bg-[#222942] text-indigo-300 hover:text-white hover:border-indigo-400 text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
+            title="Scanner une facture ou un devis fournisseur pour ajouter du matériel par IA"
+          >
+            <ScanLine className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="hidden md:inline">Scan Facture IA</span>
+          </button>
+
           {/* Connectivity Status & Queue Button */}
           <button
             id="desktop-header-connectivity-btn"
             type="button"
             onClick={() => setShowSyncQueueModal(true)}
-            className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition shadow-xs ${
+            className={`py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition shadow-sm ${
               !isOnline
                 ? "bg-amber-950/60 border-amber-500/40 text-amber-300 hover:bg-amber-900/50"
                 : offlineQueue.length > 0
                 ? "bg-indigo-950/60 border-indigo-500/40 text-indigo-300 hover:bg-indigo-900/50"
-                : "bg-[#121524] border-[#22273e] text-slate-300 hover:text-white hover:bg-[#181d30]"
+                : "bg-[#1c2237] border-slate-700/70 text-slate-300 hover:text-white hover:bg-[#222942]"
             }`}
             title="État de connexion et file d'attente hors-ligne"
           >
@@ -854,37 +967,391 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
             )}
           </button>
 
-          {/* Main CSV Export Button in Dashboard Header */}
+          {/* Export CSV Button */}
           <button
             id="desktop-export-csv-btn"
             type="button"
             onClick={() => setShowExportModal(true)}
-            className="py-2 px-3 rounded-xl border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 hover:bg-emerald-900/50 text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
+            className="py-2.5 px-3 rounded-xl border border-emerald-500/40 bg-[#1c2237] text-emerald-300 hover:text-white hover:bg-emerald-950/50 text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
             title="Exporter l'inventaire en fichier CSV pour Excel / Tableur"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            Exporter CSV
+            <span className="hidden lg:inline">Export CSV</span>
           </button>
 
-          <button
-            type="button"
-            onClick={onOpenMobileView}
-            className="py-2 px-3 rounded-xl border border-indigo-500/30 bg-indigo-950/40 text-indigo-300 hover:bg-indigo-900/50 text-xs font-semibold flex items-center gap-1.5 shadow-sm transition"
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            Mode Scanner Mobile (IA)
-          </button>
-
+          {/* New Item Modal */}
           <button
             type="button"
             onClick={() => setShowManualAddModal(true)}
-            className="py-2 px-3.5 rounded-xl bg-white text-slate-900 hover:bg-slate-200 text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
+            className="py-2.5 px-3.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 text-xs font-bold flex items-center gap-1.5 shadow-sm transition whitespace-nowrap active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
-            Nouveau Produit
+            <span>Nouveau Produit</span>
           </button>
         </div>
       </div>
+
+      {/* Top Metric KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+        {/* KPI 1: Total Stock & References */}
+        <div className="p-4 rounded-2xl bg-[#161a2b] border border-slate-700/60 hover:border-indigo-500/50 shadow-sm flex flex-col justify-between transition group">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Parc & Références
+            </span>
+            <div className="p-2 rounded-xl bg-[#1c2237] border border-slate-700/60 text-indigo-400 group-hover:scale-105 transition">
+              <Package className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-white">
+              {stats.totalStockItems}
+            </span>
+            <span className="text-xs text-slate-400 ml-1.5 font-medium">
+              en {stats.totalProducts} réf.
+            </span>
+          </div>
+        </div>
+
+        {/* KPI 2: Available Stock in Real-Time */}
+        <div className="p-4 rounded-2xl bg-[#161a2b] border border-slate-700/60 hover:border-emerald-500/50 shadow-sm flex flex-col justify-between transition group">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+              Dispo en Rayon
+            </span>
+            <div className="p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 group-hover:scale-105 transition">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-emerald-400">
+              {stats.totalAvailable}
+            </span>
+            <span className="text-xs text-slate-400 ml-1.5 font-medium">
+              unités prêtes
+            </span>
+          </div>
+        </div>
+
+        {/* KPI 3: Out on Rent / Movement */}
+        <div className="p-4 rounded-2xl bg-[#161a2b] border border-slate-700/60 hover:border-amber-500/50 shadow-sm flex flex-col justify-between transition group">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400">
+              En Location / Sortie
+            </span>
+            <div className="p-2 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-400 group-hover:scale-105 transition">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-amber-400">
+              {stats.totalRented}
+            </span>
+            <span className="text-xs text-slate-400 ml-1.5 font-medium">
+              sur {stats.activeRentalsCount} chantiers
+            </span>
+          </div>
+        </div>
+
+        {/* KPI 4: Overdue & Low Stock Alerts */}
+        <div className="p-4 rounded-2xl bg-[#161a2b] border border-slate-700/60 hover:border-rose-500/50 shadow-sm flex flex-col justify-between transition group">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-rose-400">
+              Alertes & Retards
+            </span>
+            <div className="p-2 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-400 group-hover:scale-105 transition">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-rose-400">
+              {stats.overdueCount}
+            </span>
+            <span className="text-xs text-slate-400 font-medium">
+              retards • {stats.lowStockCount} bas
+            </span>
+          </div>
+        </div>
+
+        {/* KPI 5: Total Value Asset */}
+        <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-[#161a2b] border border-slate-700/60 hover:border-indigo-500/50 shadow-sm flex flex-col justify-between transition group">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Valeur du Parc
+            </span>
+            <div className="p-2 rounded-xl bg-[#1c2237] border border-slate-700/60 text-slate-300 group-hover:scale-105 transition">
+              <Euro className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <span className="text-xl font-black text-white">
+              {stats.totalInventoryValue.toLocaleString("fr-FR")} €
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* HIGH-END DUAL-AXIS WORKSPACE: MODERN NAVIGATION & PANELS */}
+      {/* ========================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Modern Categorized Sidebar Navigation Rail */}
+        <div className="lg:col-span-3 lg:sticky lg:top-4 z-20">
+          <MainSidebar
+            activeTab={activeTab}
+            onSelectTab={(tab) => setActiveTab(tab)}
+            stats={stats}
+            quotesCount={quotes.length}
+            studiosCount={studios.length}
+            techniciansCount={technicians.length}
+            inventoryCount={items.length}
+            logsCount={logs.length}
+            isOnline={isOnline}
+            currentUser={currentUser}
+            subscription={settings.subscription}
+            depots={depots}
+            activeDepotId={activeDepotId}
+            onChangeActiveDepot={onChangeActiveDepot}
+            onLogout={onLogout}
+            onOpenQuickDeparture={() => setShowDepartureModal(true)}
+            onOpenScanInvoice={() => setShowInvoiceScannerModal(true)}
+            onOpenDualScreenPlanning={() => setActiveTab("calendar")}
+            onOpenUpgradeModal={handleOpenUpgradeModal}
+            onOpenPairingModal={onOpenPairingModal}
+            onOpenAuthModal={onTriggerAuthModal}
+            appMode={appMode}
+            onSetAppMode={onSetAppMode}
+            isSplitMode={isSplitMode}
+            onToggleSplitMode={onToggleSplitMode}
+            darkMode={darkMode}
+            onToggleDarkMode={onToggleDarkMode}
+          />
+        </div>
+
+        {/* Right Workspace Main Panel */}
+        <div className="lg:col-span-9 space-y-4">
+          {/* ========================================================= */}
+          {/* TAB 0: EXECUTIVE DASHBOARD */}
+          {/* ========================================================= */}
+          {activeTab === "dashboard" && (
+            <div className="space-y-5">
+              {/* Top Banner with Quick Actions */}
+              <div className="bg-gradient-to-r from-[#12162a] via-[#101527] to-[#0c0f1c] border border-indigo-500/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                      Tableau de Bord Régie & Logistique KROMA
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">
+                      Bonjour, {currentUser?.name || "Régisseur"}
+                    </h2>
+                    <p className="text-xs text-slate-400 max-w-xl">
+                      Gestion centralisée du parc audiovisuel, des plateaux de tournage, des devis, de la facturation et du check-in/out matériel avec pointage contradictoire.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("quotes")}
+                      className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition active:scale-95"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Nouveau Devis
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowDepartureModal(true)}
+                      className="py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-600/20 transition active:scale-95"
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                      Départ Matériel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("calendar")}
+                      className="py-2.5 px-3.5 rounded-xl bg-[#1c223c] hover:bg-[#252d4e] text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center gap-2 transition"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      Planning Régie
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Operational Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Active Rentals Summary */}
+                <div className="bg-[#0e111d] border border-[#1e233b] rounded-2xl p-4 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#1b2038]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Truck className="w-4 h-4 text-purple-400" />
+                      <span>Dossiers de Location en Cours ({(quotes || []).filter(q => q.status === "accepted" || q.rentalStatus === "in_rental").length})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("rentals")}
+                      className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+                    >
+                      Voir tout <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {(quotes || []).filter(q => q.status === "accepted" || q.rentalStatus === "in_rental" || q.rentalStatus === "overdue").length === 0 ? (
+                      <div className="p-4 text-center text-xs text-slate-500">
+                        Aucun dossier en cours de tournage.
+                      </div>
+                    ) : (
+                      (quotes || [])
+                        .filter(q => q.status === "accepted" || q.rentalStatus === "in_rental" || q.rentalStatus === "overdue")
+                        .slice(0, 4)
+                        .map(quote => (
+                          <div
+                            key={quote.id}
+                            onClick={() => setActiveTab("rentals")}
+                            className="p-2.5 rounded-xl bg-[#121524] border border-[#1e233b] hover:border-purple-500/40 cursor-pointer transition flex items-center justify-between text-xs"
+                          >
+                            <div>
+                              <p className="font-bold text-slate-100">{quote.clientName}</p>
+                              <p className="text-[11px] text-slate-400">
+                                {quote.rentalItems?.length || 0} équipement(s) • Retour {quote.endDate ? new Date(quote.endDate).toLocaleDateString("fr-FR") : "Non définie"}
+                              </p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              quote.rentalStatus === "overdue"
+                                ? "bg-rose-950/80 text-rose-300 border border-rose-800"
+                                : "bg-purple-950/80 text-purple-300 border border-purple-800"
+                            }`}>
+                              {quote.rentalStatus === "overdue" ? "En retard" : "Sur tournage"}
+                            </span>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Studios Status */}
+                <div className="bg-[#0e111d] border border-[#1e233b] rounded-2xl p-4 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#1b2038]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Building2 className="w-4 h-4 text-cyan-400" />
+                      <span>Plateaux & Studios ({(studios || []).length})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("studios")}
+                      className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+                    >
+                      Gérer <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                    {(studios || []).slice(0, 4).map(studio => (
+                      <div
+                        key={studio.id}
+                        onClick={() => setActiveTab("studios")}
+                        className="p-2.5 rounded-xl bg-[#121524] border border-[#1e233b] hover:border-cyan-500/40 cursor-pointer transition flex flex-col justify-between text-xs space-y-1"
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-slate-200 truncate">{studio.name}</p>
+                          <span className={`w-2 h-2 rounded-full ${
+                            studio.status === "available" ? "bg-emerald-400 shadow-sm shadow-emerald-400/50" : "bg-rose-400"
+                          }`} />
+                        </div>
+                        <p className="text-[11px] text-slate-400">{studio.surfaceSqm} m² • {studio.hourlyRate} €/h</p>
+                        <span className="text-[10px] text-slate-500">
+                          {studio.status === "available" ? "🟢 Disponible" : "🔴 En direct / Réservé"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Low Stock & System Scan Logs Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Low Stock Alerts */}
+                <div className="bg-[#0e111d] border border-[#1e233b] rounded-2xl p-4 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#1b2038]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-rose-300">
+                      <AlertTriangle className="w-4 h-4 text-rose-400" />
+                      <span>Alertes Stock Bas ({stats?.lowStockCount || 0})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStatusFilter("low-stock");
+                        setActiveTab("inventory");
+                      }}
+                      className="text-[11px] text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1"
+                    >
+                      Filtrer inventaire <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    {(items || []).filter(i => (i.availableQuantity ?? i.stockQuantity ?? 0) <= (i.minStockAlert || 2)).length === 0 ? (
+                      <div className="p-4 text-center text-xs text-slate-500">
+                        Tous les niveaux de stock sont optimaux.
+                      </div>
+                    ) : (
+                      (items || [])
+                        .filter(i => (i.availableQuantity ?? i.stockQuantity ?? 0) <= (i.minStockAlert || 2))
+                        .slice(0, 4)
+                        .map(item => (
+                          <div
+                            key={item.id}
+                            className="p-2 rounded-xl bg-rose-950/20 border border-rose-900/30 flex items-center justify-between text-xs"
+                          >
+                            <span className="font-semibold text-slate-200">{item.name}</span>
+                            <span className="font-bold text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-800/40">
+                              {item.availableQuantity ?? item.stockQuantity ?? 0} restant(s)
+                            </span>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Latest Scans */}
+                <div className="bg-[#0e111d] border border-[#1e233b] rounded-2xl p-4 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#1b2038]">
+                    <div className="flex items-center gap-2 text-xs font-bold text-sky-300">
+                      <Clock className="w-4 h-4 text-sky-400" />
+                      <span>Dernières Activités & Scans ({(logs || []).length})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("logs")}
+                      className="text-[11px] text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1"
+                    >
+                      Journal complet <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    {(logs || []).slice(0, 4).map(log => (
+                      <div
+                        key={log.id}
+                        className="p-2 rounded-xl bg-[#121524] border border-[#1e233b] flex items-center justify-between text-xs"
+                      >
+                        <div className="truncate pr-2">
+                          <p className="font-semibold text-slate-200 truncate">{log.title}</p>
+                          <p className="text-[10px] text-slate-500">{log.details}</p>
+                        </div>
+                        <span className="font-mono text-[10px] text-slate-400 flex-shrink-0">
+                          {new Date(log.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
       {/* ========================================================= */}
       {/* TAB 1: INVENTORY & STOCK MANAGEMENT */}
@@ -1050,7 +1517,12 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                         >
                           {/* Selection Checkbox */}
                           <td className="py-3 px-4 text-center" onClick={(e) => handleToggleSelectItem(item.id, e)}>
-                            <button type="button" className="text-slate-400 hover:text-white">
+                            <button
+                              type="button"
+                              aria-label="Sélectionner le produit"
+                              onClick={(e) => handleToggleSelectItem(item.id, e)}
+                              className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition"
+                            >
                               {isSelected ? (
                                 <CheckSquare className="w-4 h-4 text-indigo-400" />
                               ) : (
@@ -1188,155 +1660,233 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
       )}
 
       {/* ========================================================= */}
-      {/* TAB 2: ACTIVE RENTALS & MOVEMENTS LEDGER */}
+      {/* TAB: STUDIOS & SPACES (PODCAST / TOURNAGE) */}
+      {/* ========================================================= */}
+      {activeTab === "studios" && (
+        <PlanGateGuard
+          moduleName="Studios & Plateaux"
+          requiredTier="ultimate"
+          reason="La gestion et réservation des plateaux de tournage, régies et studios d'enregistrement est incluse dans la formule KROMA Ultimate."
+          hasAccess={studiosAccess.allowed}
+          onOpenUpgradeModal={handleOpenUpgradeModal}
+        >
+          <StudiosDashboard
+            studios={safeStudios}
+            inventoryItems={safeItems}
+            technicians={safeTechnicians}
+            onAddStudio={onAddStudio}
+            onUpdateStudio={onUpdateStudio}
+            onDeleteStudio={onDeleteStudio}
+            onBookStudio={onBookStudio}
+            onOpenQuoteWithStudio={(studio) => {
+              setQuotePrefillStudio(studio);
+              setActiveTab("quotes");
+            }}
+          />
+        </PlanGateGuard>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB: TECHNICIANS & CREW */}
+      {/* ========================================================= */}
+      {activeTab === "technicians" && (
+        <PlanGateGuard
+          moduleName="Personnel & Crew Intermittents"
+          requiredTier="ultimate"
+          canBuyAddon={true}
+          reason="Le planning des équipes techniques, taux horaires, qualifications et contrats d'intermittents nécessite l'option Crew (+35€/mois) ou la formule Ultimate."
+          hasAccess={techniciansAccess.allowed}
+          onOpenUpgradeModal={handleOpenUpgradeModal}
+        >
+          <TechniciansDashboard
+            technicians={safeTechnicians}
+            onAddTechnician={onAddTechnician}
+            onUpdateTechnician={onUpdateTechnician}
+            onDeleteTechnician={onDeleteTechnician}
+            onRefresh={onRefresh}
+            onAddTechToQuote={(tech) => {
+              setQuotePrefillTech(tech);
+              setActiveTab("quotes");
+            }}
+          />
+        </PlanGateGuard>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB: QUOTES GENERATOR */}
+      {/* ========================================================= */}
+      {activeTab === "quotes" && (
+        <QuotesDashboard
+          quotes={safeQuotes}
+          inventory={safeItems}
+          studios={safeStudios}
+          technicians={safeTechnicians}
+          clients={safeClients}
+          suppliers={safeSuppliers}
+          settings={settings}
+          onAddQuote={onAddQuote}
+          onUpdateQuote={onUpdateQuote}
+          onDeleteQuote={onDeleteQuote}
+          onRefresh={onRefresh}
+          prefillTech={quotePrefillTech}
+          prefillStudio={quotePrefillStudio}
+          prefillClient={quotePrefillClient}
+          onClearPrefill={() => {
+            setQuotePrefillTech(null);
+            setQuotePrefillStudio(null);
+            setQuotePrefillClient(null);
+          }}
+        />
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB: ANNUAIRE CLIENTS, LIEUX & FOURNISSEURS (LOCASYST) */}
+      {/* ========================================================= */}
+      {activeTab === "directory" && (
+        <DirectoryDashboard
+          clients={safeClients}
+          suppliers={safeSuppliers}
+          venues={safeVenues}
+          onAddClient={onAddClient}
+          onUpdateClient={onUpdateClient}
+          onDeleteClient={onDeleteClient}
+          onAddSupplier={onAddSupplier}
+          onUpdateSupplier={onUpdateSupplier}
+          onDeleteSupplier={onDeleteSupplier}
+          onAddVenue={onAddVenue}
+          onUpdateVenue={onUpdateVenue}
+          onDeleteVenue={onDeleteVenue}
+          onDraftQuoteForClient={(client) => {
+            setQuotePrefillClient(client);
+            setActiveTab("quotes");
+          }}
+        />
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB: INVOICES & FACTURATION */}
+      {/* ========================================================= */}
+      {activeTab === "invoices" && (
+        <PlanGateGuard
+          moduleName="Facturation & Échéances"
+          requiredTier="ultimate"
+          reason="L'édition des factures directes, acomptes, avoirs et relevés comptables avancés est réservée à la formule Ultimate."
+          hasAccess={invoicesAccess.allowed}
+          onOpenUpgradeModal={handleOpenUpgradeModal}
+        >
+          <InvoicesDashboard
+            quotes={safeQuotes}
+            items={safeItems}
+            settings={settings}
+            onUpdateQuote={onUpdateQuote}
+            onOpenScanInvoiceModal={() => setShowInvoiceScannerModal(true)}
+            onOpenNewQuote={() => setActiveTab("quotes")}
+          />
+        </PlanGateGuard>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB: RENTALS & KROMA-STYLE CHECK-IN / CHECK-OUT */}
       {/* ========================================================= */}
       {activeTab === "rentals" && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0e111d] p-4 rounded-2xl border border-[#1e233b]">
-            <div>
-              <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
-                <ArrowUpRight className="w-4 h-4 text-amber-400" />
-                Dossiers de Location & Mouvements de Sortie
-              </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Suivi en temps réel des expéditions chantiers et des retours en stock
-              </p>
-            </div>
+        <RentalsDossiersDashboard
+          quotes={safeQuotes}
+          items={safeItems}
+          settings={settings}
+          onUpdateQuote={onUpdateQuote}
+          onRefresh={onRefresh}
+          onOpenNewQuote={() => setActiveTab("quotes")}
+          onOpenQuickDeparture={() => setShowDepartureModal(true)}
+        />
+      )}
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleExportRentalsCSV}
-                className="py-2 px-3 rounded-xl border border-[#232842] bg-[#121524] text-slate-300 hover:text-white hover:bg-[#181c30] text-xs font-semibold flex items-center gap-1.5 transition"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-amber-400" />
-                Exporter CSV
-              </button>
+      {/* ========================================================= */}
+      {/* TAB: CALENDAR & REGIE PLANNING (SECOND SCREEN SUPPORT) */}
+      {/* ========================================================= */}
+      {activeTab === "calendar" && (
+        <CalendarPlanningDashboard
+          quotes={safeQuotes}
+          studios={safeStudios}
+          technicians={safeTechnicians}
+          items={safeItems}
+          depots={safeDepots}
+          activeDepotId={activeDepotId}
+          onOpenNewQuote={() => setActiveTab("quotes")}
+          onSelectQuote={() => {
+            setActiveTab("rentals");
+          }}
+        />
+      )}
 
-              <button
-                type="button"
-                onClick={() => setShowDepartureModal(true)}
-                className="py-2 px-3.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Nouvelle Sortie
-              </button>
-            </div>
-          </div>
+      {/* ========================================================= */}
+      {/* TAB: MALLES & FLIGHT CASES (MASTER QR / RFID BUNDLES) */}
+      {/* ========================================================= */}
+      {activeTab === "flightcases" && (
+        <PlanGateGuard
+          moduleName="Malles & Flight Cases RFID"
+          requiredTier="pro"
+          reason="Le regroupement de matériel par malles et QR Codes maîtres de kits est disponible à partir de la formule KROMA Pro."
+          hasAccess={flightcasesAccess.allowed}
+          onOpenUpgradeModal={handleOpenUpgradeModal}
+        >
+          <FlightCasesDashboard
+            inventory={safeItems}
+            items={safeItems}
+            quotes={safeQuotes}
+            settings={settings}
+            onUpdateItem={onUpdateItem}
+            onNavigateToRentals={() => setActiveTab("rentals")}
+          />
+        </PlanGateGuard>
+      )}
 
-          <div className="grid grid-cols-1 gap-3">
-            {rentals.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 bg-[#0e111d] rounded-2xl border border-[#1e233b]">
-                Aucun mouvement de location enregistré.
-              </div>
-            ) : (
-              rentals.map((rental) => {
-                const isOverdue = rental.status === "overdue";
-                const isReturned = rental.status === "returned";
+      {/* ========================================================= */}
+      {/* TAB: ATELIER SAV, RÉPARATIONS & CASSE MATÉRIEL */}
+      {/* ========================================================= */}
+      {activeTab === "maintenance" && (
+        <PlanGateGuard
+          moduleName="Atelier SAV & Suivi de Casse"
+          requiredTier="pro"
+          reason="La gestion de l'atelier de réparation, des devis de remise en état et du suivi SAV est disponible à partir de la formule KROMA Pro."
+          hasAccess={maintenanceAccess.allowed}
+          onOpenUpgradeModal={handleOpenUpgradeModal}
+        >
+          <MaintenanceSAVDashboard
+            inventory={safeItems}
+            items={safeItems}
+            quotes={safeQuotes}
+            settings={settings}
+            onUpdateItem={onUpdateItem}
+            onNavigateToQuotes={() => setActiveTab("quotes")}
+          />
+        </PlanGateGuard>
+      )}
 
-                return (
-                  <div
-                    key={rental.id}
-                    className={`p-4 rounded-2xl border bg-[#0e111d] transition shadow-sm ${
-                      isOverdue
-                        ? "border-rose-800/60 bg-rose-950/10"
-                        : isReturned
-                        ? "border-[#1e233b] opacity-75"
-                        : "border-amber-800/50 bg-amber-950/10"
-                    }`}
-                  >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                      {/* Item and Client Info */}
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`p-2.5 rounded-xl ${
-                            isReturned
-                              ? "bg-[#181d30] text-slate-400"
-                              : isOverdue
-                              ? "bg-rose-950/70 text-rose-400 border border-rose-800/40"
-                              : "bg-amber-950/70 text-amber-400 border border-amber-800/40"
-                          }`}
-                        >
-                          {isReturned ? (
-                            <ArrowDownLeft className="w-5 h-5" />
-                          ) : (
-                            <ArrowUpRight className="w-5 h-5" />
-                          )}
-                        </div>
-
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-sm text-white">
-                              {rental.itemName}
-                            </h4>
-                            <span className="px-2 py-0.5 rounded-full bg-[#181d30] border border-[#232842] font-bold text-xs text-slate-300">
-                              Quantité : x{rental.quantity}
-                            </span>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                isReturned
-                                  ? "bg-emerald-950/70 text-emerald-300 border border-emerald-800/50"
-                                  : isOverdue
-                                  ? "bg-rose-950/70 text-rose-300 border border-rose-800/50"
-                                  : "bg-amber-950/70 text-amber-300 border border-amber-800/50"
-                              }`}
-                            >
-                              {isReturned
-                                ? "Clôturé / Retourné"
-                                : isOverdue
-                                ? "⚠️ En Retard"
-                                : "En cours d'utilisation"}
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 text-xs text-slate-400">
-                            <div className="flex items-center gap-1.5">
-                              <User className="w-3.5 h-3.5 text-slate-500" />
-                              <span>Client : <strong className="text-slate-200">{rental.clientName}</strong></span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                              <span>{rental.destination || "Non précisé"}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                              <span>
-                                Retour prévu :{" "}
-                                <strong className={isOverdue ? "text-rose-400 font-bold" : "text-slate-200"}>
-                                  {new Date(rental.expectedReturnDate).toLocaleDateString("fr-FR")}
-                                </strong>
-                              </span>
-                            </div>
-                          </div>
-
-                          {rental.returnNotes && (
-                            <p className="text-[11px] text-slate-400 mt-1 italic">
-                              Note de retour : {rental.returnNotes} ({rental.returnCondition})
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Quick Return Button for Active Rentals */}
-                      {!isReturned && (
-                        <div className="flex items-center gap-2 self-end md:self-center">
-                          <button
-                            type="button"
-                            onClick={() => handleQuickCloseRental(rental)}
-                            className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            Valider le Retour Matériel
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
+      {/* ========================================================= */}
+      {/* TAB: RÉGIE & ÉCRANS RÉSEAU (DIGITAL SIGNAGE & FAILOVER) */}
+      {/* ========================================================= */}
+      {activeTab === "displays" && (
+        <PlanGateGuard
+          moduleName="Régie & Écrans Réseau"
+          requiredTier="pro"
+          reason="Le pilotage des écrans distants et le mode bascule automatique (failover) sont disponibles à partir de la formule KROMA Pro (jusqu'à 2 écrans) et illimités en formule Ultimate."
+          hasAccess={displaysAccess.allowed}
+          onOpenUpgradeModal={handleOpenUpgradeModal}
+        >
+          <NetworkDisplaysDashboard
+            darkMode={darkMode}
+            subscription={settings.subscription}
+            depots={safeDepots as any}
+            onOpenUpgradeModal={handleOpenUpgradeModal}
+            onLaunchKioskScreen={(screenId) => {
+              if (onSetAppMode) {
+                onSetAppMode("kiosk-display");
+              } else {
+                window.open(`/?display=${screenId}`, "_blank");
+              }
+            }}
+          />
+        </PlanGateGuard>
       )}
 
       {/* ========================================================= */}
@@ -1589,6 +2139,9 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
           settings={settings}
           employees={employees}
           devices={devices}
+          items={items}
+          currentUser={currentUser}
+          depots={depots}
           onUpdateSettings={onUpdateSettings}
           onAddEmployee={onAddEmployee}
           onUpdateEmployee={onUpdateEmployee}
@@ -1596,9 +2149,18 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
           onRevokeDevice={onRevokeDevice}
           onRegisterDevice={onRegisterDevice}
           onTriggerDriveSync={onTriggerDriveSync}
+          onAddDepot={onAddDepot}
+          onUpdateDepot={onUpdateDepot}
+          onDeleteDepot={onDeleteDepot}
+          onRefreshData={onRefreshData}
+          onTriggerAuthModal={onTriggerAuthModal}
           isSyncing={isSyncing}
+          darkMode={darkMode}
+          onToggleDarkMode={onToggleDarkMode}
         />
       )}
+        </div>
+      </div>
 
       {/* Advanced CSV Export Options Modal */}
       {showExportModal && (
@@ -2003,7 +2565,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                   className="w-full px-3 py-2 rounded-lg border border-[#232842] bg-[#121524] text-white outline-none focus:border-amber-500"
                 >
                   <option value="">-- Choisir un matériel --</option>
-                  {items
+                  {safeItems
                     .filter((i) => i.availableQuantity > 0)
                     .map((item) => (
                       <option key={item.id} value={item.id} className="bg-[#121524]">
@@ -2131,6 +2693,59 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
         isSyncing={isSyncing}
         lastPingTime={lastPingTime}
         onCheckConnection={onCheckConnection}
+      />
+
+      {/* Invoice / Quote AI Scanner Modal */}
+      <InvoiceScannerModal
+        isOpen={showInvoiceScannerModal}
+        onClose={() => setShowInvoiceScannerModal(false)}
+        onItemsImported={async () => {
+          if (onRefreshData) {
+            await onRefreshData();
+          } else if (onRefresh) {
+            onRefresh();
+          }
+          showToast("success", "Matériel extrait de la facture importé avec succès !");
+        }}
+      />
+
+      {/* Global Command Palette (Spotlight Search ⌘K) */}
+      <CommandPaletteModal
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        items={items}
+        studios={studios}
+        technicians={technicians}
+        quotes={quotes}
+        onNavigate={(tab) => setActiveTab(tab)}
+        onOpenItemDetail={(item) => onOpenItemDetail(item)}
+        onOpenManualAdd={() => setShowManualAddModal(true)}
+        onOpenInvoiceScanner={() => setShowInvoiceScannerModal(true)}
+        onOpenDeparture={() => setShowDepartureModal(true)}
+      />
+
+      {/* Subscription Plan Upgrade & Pricing Modal */}
+      <PlanUpgradeModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        currentSubscription={settings.subscription}
+        recommendedTier={upgradeTargetTier}
+        onPlanChanged={async (updatedConfig) => {
+          await onUpdateSettings({
+            subscription: updatedConfig,
+          });
+          showToast(
+            "success",
+            `Formule KROMA mise à jour avec succès : ${updatedConfig.tier.toUpperCase()} (${
+              updatedConfig.billingCycle === "annual" ? "Annuel" : "Mensuel"
+            })`
+          );
+          if (onRefreshData) {
+            await onRefreshData();
+          } else if (onRefresh) {
+            onRefresh();
+          }
+        }}
       />
     </div>
   );

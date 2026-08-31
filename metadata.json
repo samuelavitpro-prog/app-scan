@@ -1,6 +1,6 @@
 {
-  "name": "ScanLogix - Inventaire & Location IA",
-  "description": "Gestion d'inventaire et suivi des locations en temps réel avec analyse photo IA Gemini, mode déconnecté avec file d'attente de synchronisation, exports CSV complets et synchronisation multi-appareils.",
+  "name": "KROMA - Studio, Événementiel & Stock IA",
+  "description": "Système d'exploitation professionnel pour la production audiovisuelle et événementielle : devis cinéma dégressifs, malles & flight cases Master QR/RFID, atelier SAV & refacturation casse, régie d'écrans distants & digital signage avec bascule automatique failover IP/Web, portail client e-signature, facturation Factur-X et planning régie multi-écrans.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
