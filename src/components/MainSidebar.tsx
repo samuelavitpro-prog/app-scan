@@ -171,7 +171,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
         </div>
 
         {/* WORKSPACE PROFILE */}
-        <div className={`p-2.5 rounded-2xl border ${activeProfile.theme.accentSoft}`}>
+        <div className={`workspace-profile-card p-2.5 rounded-2xl border ${activeProfile.theme.accentSoft}`}>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[10px] uppercase tracking-wider font-bold opacity-80">Univers métier</span>
             <span className="text-[9px] font-bold uppercase opacity-70">Profil actif</span>

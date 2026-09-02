@@ -972,6 +972,42 @@ textarea:focus-visible {
   background: #fff;
 }
 
+#desktop-dashboard.locasyst-theme .workspace-profile-card {
+  color: #60758b !important;
+  background: #f5f8fb !important;
+  border-color: #cbd9e4 !important;
+}
+
+#desktop-dashboard.locasyst-theme .workspace-profile-card .opacity-80,
+#desktop-dashboard.locasyst-theme .workspace-profile-card .opacity-70,
+#desktop-dashboard.locasyst-theme .workspace-profile-card .opacity-75 {
+  opacity: 1 !important;
+}
+
+#desktop-dashboard.locasyst-theme .workspace-profile-card select {
+  color: #1b2d43 !important;
+  background: #fff !important;
+  border-color: #c3d2de !important;
+}
+
+#desktop-dashboard.locasyst-theme .profile-production .workspace-profile-card {
+  color: #2f668f !important;
+  background: #edf5fa !important;
+  border-color: #a9c8dc !important;
+}
+
+#desktop-dashboard.locasyst-theme .profile-cinema .workspace-profile-card {
+  color: #823c54 !important;
+  background: #faeef2 !important;
+  border-color: #dfb8c4 !important;
+}
+
+#desktop-dashboard.locasyst-theme .profile-wedding .workspace-profile-card {
+  color: #76552e !important;
+  background: #fbf4e9 !important;
+  border-color: #dfc79f !important;
+}
+
 #desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-displays,
 #desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-flightcases,
 #desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-maintenance,
