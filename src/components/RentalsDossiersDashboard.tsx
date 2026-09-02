@@ -46,6 +46,7 @@ import {
 import { DocumentPrintModal } from "./DocumentPrintModal";
 import { SignaturePadModal, SignatureTargetType } from "./SignaturePadModal";
 import { PenTool, UserCheck, ShieldCheck } from "lucide-react";
+import { LocasystRentalDetailModal } from "./LocasystRentalDetailModal";
 
 interface RentalsDossiersDashboardProps {
   quotes?: ClientQuote[];
@@ -825,6 +826,16 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
       {/* 1. FULL KROMA DOSSIER DETAILS MODAL (OUVERTURE DU DEVIS & INFOS)           */}
       {/* ========================================================================= */}
       {activeDossierModal && (
+        <LocasystRentalDetailModal
+          quote={activeDossierModal}
+          onClose={() => setActiveDossierModal(null)}
+          onOpenCheckin={(quote) => handleOpenCheckin(quote, "incomplete")}
+          onQuickReturn={handleQuickRetourComplet}
+          onPrint={(quote, type) => setPrintModalData({ quote, type })}
+          onSign={(quote) => setSignatureModalData({ quote, target: quote.rentalStatus === "returned" ? "client_return" : "client_departure" })}
+        />
+      )}
+      {false && activeDossierModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
           <div className="w-full max-w-4xl bg-[#0e111d] border border-[#232945] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             {/* Modal Header */}
