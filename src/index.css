@@ -1552,6 +1552,54 @@ textarea:focus-visible {
   line-height: 1.5;
 }
 
+/* Focus mode requested for quotation entry: document first, material import on demand. */
+#modal-quote-builder .quote-builder-tabs,
+#modal-quote-builder .quote-builder-summary,
+#modal-quote-builder .quote-builder-preset-packs,
+#modal-quote-builder .quote-builder-resource-tabs {
+  display: none !important;
+}
+
+#modal-quote-builder .quote-builder-form {
+  display: block !important;
+  padding: 20px 28px 28px !important;
+}
+
+#modal-quote-builder .quote-builder-form-main {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+#modal-quote-builder .quote-builder-import-button {
+  background: var(--kroma-accent, #3978a8) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 12px rgba(57,120,168,.2);
+}
+
+#modal-quote-builder .quote-builder-import-button:hover {
+  background: var(--kroma-accent-dark, #2f668f) !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:first-child {
+  min-height: 72px;
+}
+
+#modal-quote-builder .quote-builder-form-main > div[class*="animate-fadeIn"] > div {
+  border-radius: 12px !important;
+  border-color: #d1dee8 !important;
+  box-shadow: 0 3px 10px rgba(25,53,79,.04) !important;
+}
+
+@media (max-width: 700px) {
+  #modal-quote-builder .quote-builder-form {
+    padding: 14px !important;
+  }
+
+  #modal-quote-builder .quote-builder-import-button {
+    padding-inline: 9px;
+  }
+}
+
 @media (max-width: 900px) {
   #modal-quote-builder .quote-builder-form {
     grid-template-columns: 1fr;

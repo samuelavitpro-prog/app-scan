@@ -868,6 +868,14 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setBuilderStep(2)}
+              className="quote-builder-import-button py-1.5 px-3 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 transition"
+            >
+              <Package className="w-3.5 h-3.5" />
+              Importer du matériel
+            </button>
+            <button
+              type="button"
               onClick={handleLoadLocasystEventTemplate}
               className="py-1.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition"
               title="Charger un modèle de devis"
@@ -1329,7 +1337,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
           {builderStep === 2 && (
             <div className="space-y-4 animate-fadeIn">
               {/* Quick Preset Packs Bar */}
-              <div className="p-3.5 rounded-2xl bg-[#121626] border border-[#232a48] space-y-2">
+              <div className="quote-builder-preset-packs p-3.5 rounded-2xl bg-[#121626] border border-[#232a48] space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-amber-400" />
@@ -1397,7 +1405,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               </div>
 
               {/* Sub-Navigation Tabs (Matériel, Studios, Techniciens) */}
-              <div className="flex items-center gap-2 border-b border-[#1e243d] pb-2">
+              <div className="quote-builder-resource-tabs flex items-center gap-2 border-b border-[#1e243d] pb-2">
                 <button
                   type="button"
                   onClick={() => setActiveItemTab("equipment")}
@@ -1450,13 +1458,13 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                         </div>
                         <div>
                           <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                            Menu Déroulant : Sélection de Matériel
+                            Importer du matériel
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
                               {safeCatalogList.length} articles disponibles
                             </span>
                           </h3>
                           <p className="text-[11px] text-slate-400">
-                            Choisissez un équipement dans la liste déroulante ci-dessous pour l'ajouter directement
+                            Sélectionnez une référence puis ajoutez-la directement au devis
                           </p>
                         </div>
                       </div>
