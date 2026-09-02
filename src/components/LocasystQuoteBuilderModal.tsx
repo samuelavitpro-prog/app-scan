@@ -65,6 +65,15 @@ interface LocasystQuoteBuilderModalProps {
   onSave: (quote: Partial<ClientQuote>) => Promise<void> | void;
 }
 
+const DEMO_MATERIAL: InventoryItem[] = [
+  { id: "demo-camera-fx6", sku: "CAM-FX6", name: "Sony FX6", category: "Caméra", brand: "Sony", description: "Caméra cinéma plein format", totalQuantity: 4, availableQuantity: 3, rentedQuantity: 1, minStockAlert: 1, unitPrice: 180, rentalRatePerDay: 180, replacementValue: 6000, location: "Rayon A1", condition: "Très bon état", imageUrl: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=320&q=80", barcode: "DEMO-CAM-001", tags: ["caméra", "cinéma"], createdAt: "2026-01-01", updatedAt: "2026-01-01" },
+  { id: "demo-lens-2470", sku: "OPT-2470", name: "FE 24–70 mm f/2.8 GM II", category: "Optique", brand: "Sony", description: "Zoom standard lumineux", totalQuantity: 6, availableQuantity: 5, rentedQuantity: 1, minStockAlert: 1, unitPrice: 85, rentalRatePerDay: 85, replacementValue: 2200, location: "Rayon B2", condition: "Très bon état", imageUrl: "https://images.unsplash.com/photo-1606986628253-3c2f4f7d39a4?auto=format&fit=crop&w=320&q=80", barcode: "DEMO-OPT-001", tags: ["objectif", "zoom"], createdAt: "2026-01-01", updatedAt: "2026-01-01" },
+  { id: "demo-light-600d", sku: "LUM-600D", name: "Aputure 600D Pro", category: "Lumière", brand: "Aputure", description: "Projecteur LED daylight", totalQuantity: 8, availableQuantity: 8, rentedQuantity: 0, minStockAlert: 2, unitPrice: 110, rentalRatePerDay: 110, replacementValue: 1900, location: "Rayon C1", condition: "Neuf", imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=320&q=80", barcode: "DEMO-LUM-001", tags: ["led", "projecteur"], createdAt: "2026-01-01", updatedAt: "2026-01-01" },
+  { id: "demo-audio-uwp", sku: "SON-UWP", name: "Kit HF UWP-D", category: "Son", brand: "Sony", description: "Micro-cravate HF double", totalQuantity: 10, availableQuantity: 7, rentedQuantity: 3, minStockAlert: 2, unitPrice: 65, rentalRatePerDay: 65, replacementValue: 900, location: "Rayon D3", condition: "Bon état", imageUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=320&q=80", barcode: "DEMO-SON-001", tags: ["micro", "hf"], createdAt: "2026-01-01", updatedAt: "2026-01-01" },
+  { id: "demo-monitor-ninja", sku: "VID-NINJA", name: "Ninja V 5\"", category: "Vidéo", brand: "Atomos", description: "Moniteur-enregistreur 4K", totalQuantity: 5, availableQuantity: 4, rentedQuantity: 1, minStockAlert: 1, unitPrice: 55, rentalRatePerDay: 55, replacementValue: 850, location: "Rayon E1", condition: "Très bon état", imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=320&q=80", barcode: "DEMO-VID-001", tags: ["moniteur", "enregistreur"], createdAt: "2026-01-01", updatedAt: "2026-01-01" },
+  { id: "demo-tripod", sku: "MAC-TRIP", name: "Trépied vidéo 75 mm", category: "Machinerie", brand: "Manfrotto", description: "Trépied avec tête fluide", totalQuantity: 12, availableQuantity: 10, rentedQuantity: 2, minStockAlert: 2, unitPrice: 35, rentalRatePerDay: 35, replacementValue: 700, location: "Rayon F2", condition: "Bon état", imageUrl: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=320&q=80", barcode: "DEMO-MAC-001", tags: ["pied", "support"], createdAt: "2026-01-01", updatedAt: "2026-01-01" },
+];
+
 export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps> = ({
   editingQuote,
   clients = [],
@@ -79,6 +88,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
 }) => {
   // 3-step wizard step
   const [builderStep, setBuilderStep] = useState<1 | 2 | 3>(1);
+  const [isMaterialImporterOpen, setIsMaterialImporterOpen] = useState(false);
 
   // General event & client details
   const [selectedClientId, setSelectedClientId] = useState<string>(
@@ -223,6 +233,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
   const [activeItemTab, setActiveItemTab] = useState<"equipment" | "studios" | "technicians">("equipment");
   const [catalogSearch, setCatalogSearch] = useState<string>("");
   const [catalogCategoryFilter, setCatalogCategoryFilter] = useState<string>("all");
+  const [catalogTypeFilter, setCatalogTypeFilter] = useState<string>("all");
   
   // Dropdown equipment selector state
   const [selectedDropdownItemId, setSelectedDropdownItemId] = useState<string>("");
@@ -231,7 +242,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
 
   // Safe catalog list (merges inventoryItems and comprehensive audiovisual defaults)
   const safeCatalogList = useMemo(() => {
-    const base = inventoryItems && inventoryItems.length > 0 ? inventoryItems : [];
+    const base = inventoryItems && inventoryItems.length > 0 ? inventoryItems : DEMO_MATERIAL;
     return base;
   }, [inventoryItems]);
 
@@ -327,9 +338,10 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
       const matchCategory =
         catalogCategoryFilter === "all" ||
         item.category?.toLowerCase() === catalogCategoryFilter.toLowerCase();
-      return matchSearch && matchCategory;
+      const matchType = catalogTypeFilter === "all" || item.managementMode === catalogTypeFilter || item.category?.toLowerCase() === catalogTypeFilter.toLowerCase();
+      return matchSearch && matchCategory && matchType;
     });
-  }, [safeCatalogList, catalogSearch, catalogCategoryFilter]);
+  }, [safeCatalogList, catalogSearch, catalogCategoryFilter, catalogTypeFilter]);
 
   // Handle Add Item from Dropdown with Quantity
   const handleAddItemWithQuantity = (item: InventoryItem, qty: number = 1) => {
@@ -848,7 +860,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
       id="modal-quote-builder"
       className="quote-builder-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
     >
-      <div className="quote-builder-modal bg-[#0e111d] border border-[#232a48] rounded-3xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      <div className="quote-builder-modal relative bg-[#0e111d] border border-[#232a48] rounded-3xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-[#1e243d] flex items-center justify-between bg-[#121626]">
           <div className="flex items-center gap-3">
@@ -868,20 +880,11 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setBuilderStep(2)}
+              onClick={() => setIsMaterialImporterOpen(true)}
               className="quote-builder-import-button py-1.5 px-3 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 transition"
             >
               <Package className="w-3.5 h-3.5" />
               Importer du matériel
-            </button>
-            <button
-              type="button"
-              onClick={handleLoadLocasystEventTemplate}
-              className="py-1.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition"
-              title="Charger un modèle de devis"
-            >
-              <Receipt className="w-3.5 h-3.5" />
-              Charger un modèle
             </button>
             <button
               onClick={onClose}
@@ -2349,6 +2352,31 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
             <p className="quote-summary-hint">Les montants et la disponibilité se recalculent automatiquement à chaque modification.</p>
           </aside>
         </form>
+
+        {isMaterialImporterOpen && (
+          <div className="material-importer-overlay" role="dialog" aria-label="Ajouter du matériel">
+            <div className="material-importer-panel">
+              <div className="material-importer-header">
+                <div><div className="material-importer-kicker">CATALOGUE MATÉRIEL</div><h3>Ajouter du matériel</h3><p>Recherchez une référence puis ajoutez-la au devis. Vous pouvez continuer à ajouter plusieurs articles.</p></div>
+                <button type="button" onClick={() => setIsMaterialImporterOpen(false)} className="material-importer-close"><X size={20} /></button>
+              </div>
+              <div className="material-importer-filters">
+                <div className="material-importer-search"><Search size={17} /><input value={catalogSearch} onChange={(e) => setCatalogSearch(e.target.value)} placeholder="Rechercher par nom, type, catégorie ou marque..." autoFocus /></div>
+                <select value={catalogTypeFilter} onChange={(e) => setCatalogTypeFilter(e.target.value)}><option value="all">Tous les types</option><option value="serialized">À l’unité</option><option value="bulk_quantity">Quantitatif</option><option value="consumable">Consommable</option></select>
+                <select value={catalogCategoryFilter} onChange={(e) => setCatalogCategoryFilter(e.target.value)}><option value="all">Toutes les catégories</option>{[...new Set(safeCatalogList.map((item) => item.category))].map((category) => <option key={category} value={category}>{category}</option>)}</select>
+              </div>
+              <div className="material-importer-count">{filteredCatalogItems.length} article(s) trouvé(s) · Cliquez sur Ajouter pour constituer le devis</div>
+              <div className="material-importer-grid">
+                {filteredCatalogItems.map((item) => { const selected = rentalItems.some((line) => line.itemId === item.id); const available = item.availableQuantity ?? 0; return <article className="material-card" key={item.id}>
+                  <div className="material-card-image">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Package size={30} />}</div>
+                  <div className="material-card-body"><div className="material-card-category">{item.category} · {item.brand}</div><h4>{item.name}</h4><p>{item.description || item.technicalSubDesignation || "Matériel audiovisuel"}</p><div className="material-card-meta"><span>{item.rentalRatePerDay || 25} €/jour</span><span className={available > 0 ? "is-available" : "is-unavailable"}>{available > 0 ? `${available} disponible(s)` : "Indisponible"}</span></div><button type="button" onClick={() => handleAddItemFromCatalog(item)} className={selected ? "material-card-add is-added" : "material-card-add"}><Plus size={15} /> {selected ? "Ajouter encore" : "Ajouter au devis"}</button></div>
+                </article>; })}
+              </div>
+              {filteredCatalogItems.length === 0 && <div className="material-importer-empty"><Package size={34} /><strong>Aucun matériel trouvé</strong><span>Essayez un nom, un type ou une autre catégorie.</span></div>}
+              <div className="material-importer-footer"><span>{rentalItems.length} ligne(s) déjà ajoutée(s) au devis</span><button type="button" onClick={() => setIsMaterialImporterOpen(false)} className="material-importer-done"><Check size={16} /> Terminer les ajouts</button></div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
