@@ -1365,3 +1365,200 @@ textarea:focus-visible {
   background: #c48932 !important;
   color: #fff !important;
 }
+
+/* Quote editor: stable two-column workspace with a persistent commercial summary. */
+#modal-quote-builder .quote-builder-tabs {
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+  background: #fff !important;
+  border-color: #dce5ed !important;
+}
+
+#modal-quote-builder .quote-builder-tabs > div:first-child {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+#modal-quote-builder .quote-builder-tabs button {
+  min-height: 42px;
+  border: 1px solid #d8e2ea !important;
+  border-radius: 9px !important;
+  background: #f7fafc !important;
+  color: #62768b !important;
+  white-space: nowrap;
+  box-shadow: none !important;
+}
+
+#modal-quote-builder .quote-builder-tabs button:hover {
+  background: #edf4f8 !important;
+  color: #203852 !important;
+}
+
+#modal-quote-builder .quote-builder-tabs button.bg-indigo-600 {
+  background: var(--kroma-accent) !important;
+  border-color: var(--kroma-accent) !important;
+  color: #fff !important;
+}
+
+#modal-quote-builder .quote-builder-tabs button.bg-indigo-600 span {
+  background: rgba(255,255,255,.22) !important;
+  color: #fff !important;
+}
+
+#modal-quote-builder .quote-builder-tabs > div:last-child {
+  flex: 0 0 auto;
+  border: 1px solid #cfe0ea !important;
+  border-radius: 9px !important;
+  background: #f1f7fa !important;
+}
+
+#modal-quote-builder .quote-builder-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 275px;
+  align-items: start;
+  gap: 18px;
+  padding: 18px 20px 22px !important;
+  background: #eef2f5 !important;
+}
+
+#modal-quote-builder .quote-builder-form-main {
+  min-width: 0;
+}
+
+#modal-quote-builder .quote-builder-summary {
+  position: sticky;
+  top: 0;
+  padding: 17px;
+  border: 1px solid #cbd9e4;
+  border-radius: 12px;
+  background: #fff;
+  color: #203852;
+  box-shadow: 0 5px 16px rgba(25,53,79,.06);
+}
+
+#modal-quote-builder .quote-summary-kicker {
+  color: var(--kroma-accent, #3978a8);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+#modal-quote-builder .quote-summary-status {
+  display: inline-flex;
+  margin-top: 9px;
+  padding: 5px 8px;
+  border: 1px solid #b9dfca;
+  border-radius: 6px;
+  background: #eaf6f0;
+  color: #287b51;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+#modal-quote-builder .quote-builder-summary h3 {
+  margin: 15px 0 3px;
+  color: #1b2d43 !important;
+  font-size: 16px;
+  font-weight: 850;
+  line-height: 1.2;
+}
+
+#modal-quote-builder .quote-builder-summary > p {
+  margin: 0;
+  color: #71849a;
+  font-size: 11px;
+}
+
+#modal-quote-builder .quote-summary-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: #e2e9ef;
+}
+
+#modal-quote-builder .quote-summary-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px 10px;
+}
+
+#modal-quote-builder .quote-summary-metrics span {
+  display: block;
+  margin-bottom: 4px;
+  color: #8495a7;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+#modal-quote-builder .quote-summary-metrics strong {
+  color: #2b4058;
+  font-size: 12px;
+}
+
+#modal-quote-builder .quote-summary-metrics strong.is-total {
+  color: #218158;
+  font-size: 14px;
+}
+
+#modal-quote-builder .quote-summary-progress {
+  display: grid;
+  gap: 6px;
+}
+
+#modal-quote-builder .quote-summary-progress button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 3px 0;
+  border: 0;
+  background: transparent;
+  color: #8697a8;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+}
+
+#modal-quote-builder .quote-summary-progress button span {
+  display: grid;
+  width: 21px;
+  height: 21px;
+  place-items: center;
+  border: 1px solid #d3dfe8;
+  border-radius: 50%;
+  background: #f7fafc;
+  color: #8b9bad;
+  font-size: 10px;
+}
+
+#modal-quote-builder .quote-summary-progress button.is-done {
+  color: var(--kroma-accent, #3978a8);
+}
+
+#modal-quote-builder .quote-summary-progress button.is-done span {
+  border-color: var(--kroma-accent, #3978a8);
+  background: #edf5fa;
+  color: var(--kroma-accent, #3978a8);
+}
+
+#modal-quote-builder .quote-summary-hint {
+  margin-top: 16px !important;
+  color: #8798a9 !important;
+  font-size: 10px !important;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  #modal-quote-builder .quote-builder-form {
+    grid-template-columns: 1fr;
+  }
+
+  #modal-quote-builder .quote-builder-summary {
+    position: static;
+    grid-row: 1;
+  }
+}

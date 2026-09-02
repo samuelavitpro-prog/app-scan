@@ -884,8 +884,8 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
           </div>
         </div>
 
-        {/* STEPPER NAVIGATION BAR */}
-        <div className="px-5 py-3 bg-[#0a0d17] border-b border-[#1e243d] flex flex-wrap items-center justify-between gap-3">
+        {/* METIER NAVIGATION BAR */}
+        <div className="quote-builder-tabs px-5 py-3 bg-[#0a0d17] border-b border-[#1e243d] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Step 1 Button */}
             <button
@@ -900,7 +900,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${builderStep === 1 ? "bg-white text-indigo-600" : "bg-slate-700 text-slate-300"}`}>
                 1
               </span>
-              <span>1. Projet & Dates</span>
+              <span>Affaire & dates</span>
             </button>
 
             <ChevronRight className="w-4 h-4 text-slate-600 hidden sm:block" />
@@ -918,7 +918,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${builderStep === 2 ? "bg-white text-indigo-600" : "bg-slate-700 text-slate-300"}`}>
                 2
               </span>
-              <span>2. Matériel ({rentalItems.length})</span>
+              <span>Matériel & ressources ({rentalItems.length})</span>
             </button>
 
             <ChevronRight className="w-4 h-4 text-slate-600 hidden sm:block" />
@@ -936,7 +936,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${builderStep === 3 ? "bg-white text-indigo-600" : "bg-slate-700 text-slate-300"}`}>
                 3
               </span>
-              <span>3. Conditions & Totaux</span>
+              <span>Conditions & documents</span>
             </button>
           </div>
 
@@ -950,7 +950,8 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 overflow-y-auto flex-1 text-xs space-y-6">
+        <form onSubmit={handleSubmit} className="quote-builder-form p-5 sm:p-6 overflow-y-auto flex-1 text-xs space-y-6">
+          <div className="quote-builder-form-main">
           {/* ============================================================= */}
           {/* STEP 1: PROJET, CLIENT & PLANNING                             */}
           {/* ============================================================= */}
@@ -2311,6 +2312,34 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               </div>
             </div>
           )}
+          </div>
+
+          <aside className="quote-builder-summary" aria-label="Résumé du devis">
+            <div className="quote-summary-kicker">SYNTHÈSE EN DIRECT</div>
+            <div className="quote-summary-status">{quoteStatus === "draft" ? "Brouillon" : quoteStatus === "sent" ? "Envoyé" : quoteStatus === "accepted" ? "Accepté" : quoteStatus}</div>
+            <h3>{projectName.trim() || "Nouvelle affaire"}</h3>
+            <p>{clientCompany.trim() || "Client à renseigner"}</p>
+            <div className="quote-summary-divider" />
+            <div className="quote-summary-metrics">
+              <div><span>Matériel</span><strong>{rentalItems.length} ligne(s)</strong></div>
+              <div><span>Durée</span><strong>{computedShootDays} jour(s)</strong></div>
+              <div><span>Total HT</span><strong>{totalHT.toLocaleString("fr-FR")} €</strong></div>
+              <div><span>Total TTC</span><strong className="is-total">{totalTTC.toLocaleString("fr-FR")} €</strong></div>
+            </div>
+            <div className="quote-summary-divider" />
+            <div className="quote-summary-progress">
+              {[
+                [1, "Affaire"],
+                [2, "Ressources"],
+                [3, "Conditions"],
+              ].map(([step, label]) => (
+                <button type="button" key={String(step)} onClick={() => setBuilderStep(step as 1 | 2 | 3)} className={builderStep >= step ? "is-done" : ""}>
+                  <span>{builderStep > step ? "✓" : step}</span>{label}
+                </button>
+              ))}
+            </div>
+            <p className="quote-summary-hint">Les montants et la disponibilité se recalculent automatiquement à chaque modification.</p>
+          </aside>
         </form>
       </div>
     </div>
