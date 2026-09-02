@@ -1327,3 +1327,41 @@ textarea:focus-visible {
     padding: 16px !important;
   }
 }
+
+/* Final hierarchy/readability overrides for the production shell. */
+#desktop-dashboard.locasyst-theme .dashboard-compact-operational-header {
+  display: none !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-300,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-400,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-500 {
+  color: #60758b !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-white {
+  color: #1b2d43 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar button:not([class*="bg-indigo-600"]):not([class*="bg-amber-500"]) {
+  color: #60758b !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar button:not([class*="bg-indigo-600"]):not([class*="bg-amber-500"]):hover {
+  color: #1b2d43 !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero .text-indigo-300,
+#desktop-dashboard.locasyst-theme .dashboard-hero .text-indigo-400 {
+  color: var(--kroma-accent) !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero button.bg-purple-600 {
+  background: var(--kroma-accent) !important;
+  color: #fff !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero button.bg-amber-500 {
+  background: #c48932 !important;
+  color: #fff !important;
+}

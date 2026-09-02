@@ -1344,7 +1344,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
               </div>
 
               {/* Compact operational header: actions stay visible without a marketing hero. */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <div className="dashboard-compact-operational-header flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#3978a8]">{activeProfile.copy.dashboardEyebrow}</p>
                   <h2 className="text-base font-black text-[#17243a]">{activeProfile.copy.dashboardTitle}</h2>
