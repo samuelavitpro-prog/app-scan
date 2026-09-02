@@ -132,7 +132,8 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
   const safeDepots = depots || [];
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [planningView, setPlanningView] = useState<"gantt-resources" | "calendar-grid" | "today-counter" | "inventory-blocks">("gantt-resources");
+  const [planningView, setPlanningView] = useState<"gantt-resources" | "calendar-grid" | "prestations" | "today-counter" | "inventory-blocks">("gantt-resources");
+  const [calendarRange, setCalendarRange] = useState<"day" | "week" | "month">("month");
   const [filterType, setFilterType] = useState<"all" | "rentals" | "studios" | "crew" | "inventory_blocks">("all");
   const [validationFilter, setValidationFilter] = useState<"all" | "validated_only" | "drafts">("all");
   const [selectedDepotFilter, setSelectedDepotFilter] = useState<string>(activeDepotId || "ALL");
@@ -312,6 +313,19 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday
   const startDayOffset = (firstDayIndex + 6) % 7; // Monday-first offset (0 for Mon, 6 for Sun)
+  const calendarRangeDays = (() => {
+    const base = new Date(currentDate);
+    if (calendarRange === "day") return [base];
+    const monday = new Date(base);
+    const mondayOffset = (monday.getDay() + 6) % 7;
+    monday.setDate(monday.getDate() - mondayOffset);
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + index);
+      return day;
+    });
+  })();
+  const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
   const monthNames = [
     "Janvier",
@@ -1088,6 +1102,26 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
               <span>Calendrier Mensuel</span>
             </button>
 
+            {planningView === "calendar-grid" && (
+              <div className="calendar-range-switch" role="group" aria-label="Période du calendrier">
+                {(["day", "week", "month"] as const).map((range) => (
+                  <button key={range} type="button" onClick={() => setCalendarRange(range)} className={calendarRange === range ? "is-active" : ""}>
+                    {range === "day" ? "Jour" : range === "week" ? "Semaine" : "Mois"}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              id="btn-view-prestations"
+              onClick={() => setPlanningView("prestations")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${planningView === "prestations" ? "bg-cyan-600 text-white shadow" : "text-slate-400 hover:text-slate-200"}`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Prestations</span>
+            </button>
+
             <button
               type="button"
               id="btn-view-counter"
@@ -1289,6 +1323,23 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
         </div>
       </div>
 
+      {/* EVENTSOFT-STYLE VIEW: ONE CARD PER PRESTATION, WITH PHASES AND RESOURCES */}
+      {planningView === "prestations" && (
+        <div className="prestation-planning-board">
+          <div className="prestation-board-header"><div><span className="prestation-board-kicker">PLANIFICATION ÉVÉNEMENTIELLE</span><h3>Prestations & équipes</h3><p>Chaque affaire regroupe ses phases, ses ressources et sa logistique.</p></div><span className="prestation-board-count">{filteredQuotes.length} prestation(s)</span></div>
+          <div className="prestation-board-list">
+            {filteredQuotes.length === 0 ? <div className="prestation-empty"><Sparkles size={30} /><strong>Aucune prestation sur la période</strong><span>Validez un devis ou élargissez les filtres pour l’afficher ici.</span></div> : filteredQuotes.map((quote) => {
+              const phases = [
+                { label: "Montage", value: quote.setupSchedule || "À planifier", tone: "setup" },
+                { label: "Exploitation", value: quote.exploitationSchedule || `${quote.durationDays || 1} jour(s)`, tone: "run" },
+                { label: "Démontage", value: quote.teardownSchedule || "À planifier", tone: "teardown" },
+              ];
+              return <button type="button" key={quote.id} onClick={() => onSelectQuote?.(quote)} className="prestation-card"><div className="prestation-card-top"><div><span className="prestation-card-ref">{quote.quoteNumber} · {quote.status === "draft" ? "Brouillon" : "Confirmée"}</span><h4>{quote.projectName || quote.clientCompany || quote.clientName}</h4><p>{quote.clientName} · {quote.eventLocation || quote.shippingAddress || "Lieu à renseigner"}</p></div><div className="prestation-card-dates"><strong>{new Date(quote.startDate).toLocaleDateString("fr-FR")}</strong><span>→ {new Date(quote.endDate).toLocaleDateString("fr-FR")}</span></div></div><div className="prestation-phase-grid">{phases.map((phase) => <div key={phase.label} className={`prestation-phase is-${phase.tone}`}><span>{phase.label}</span><strong>{phase.value}</strong></div>)}</div><div className="prestation-card-footer"><span><Package size={14} /> {quote.rentalItems?.reduce((sum, item) => sum + item.quantity, 0) || 0} matériel</span><span><Building2 size={14} /> {quote.studioRentals?.length || 0} studio</span><span><Users size={14} /> {quote.crewStaff?.length || 0} équipe</span><span className="prestation-card-open">Ouvrir la prestation <ChevronRight size={14} /></span></div></button>;
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ========================================================================= */}
       {/* VIEW 1: GANTT PLANNING RESSOURCES (MATÉRIELS & BLOCAGES PAR JOUR) */}
       {/* ========================================================================= */}
@@ -1466,8 +1517,21 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
       {/* ========================================================================= */}
       {planningView === "calendar-grid" && (
         <div className="bg-[#0e111e] border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
+          {calendarRange !== "month" && (
+            <div className={`calendar-range-board ${calendarRange === "day" ? "is-day" : "is-week"}`}>
+              {calendarRangeDays.map((date) => {
+                const events = getEventsForDate(dateKey(date));
+                return (
+                  <div key={dateKey(date)} className="calendar-range-column">
+                    <div className="calendar-range-heading"><span>{date.toLocaleDateString("fr-FR", { weekday: "long" })}</span><strong>{date.getDate()} {monthNames[date.getMonth()]}</strong></div>
+                    <div className="calendar-range-events">{events.length === 0 ? <span className="calendar-range-empty">Aucune prestation</span> : events.map((evt) => <button type="button" key={evt.id} onClick={() => evt.quoteRef && onSelectQuote?.(evt.quoteRef)} className={`calendar-range-event ${evt.type === "studio" ? "is-studio" : evt.type === "crew" ? "is-crew" : evt.type === "inventory_block" ? "is-block" : "is-rental"}`}><strong>{evt.title}</strong><span>{evt.subtitle}</span></button>)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           {/* Day Names Header */}
-          <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold uppercase tracking-wider text-slate-400 pb-2 border-b border-slate-800">
+          <div className={`grid grid-cols-7 gap-2 text-center text-xs font-bold uppercase tracking-wider text-slate-400 pb-2 border-b border-slate-800 ${calendarRange !== "month" ? "hidden" : ""}`}>
             <div>Lun</div>
             <div>Mar</div>
             <div>Mer</div>
@@ -1478,7 +1542,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
           </div>
 
           {/* Days Cells Grid */}
-          <div className="grid grid-cols-7 gap-2">
+          <div className={`grid grid-cols-7 gap-2 ${calendarRange !== "month" ? "hidden" : ""}`}>
             {/* Blank leading days */}
             {Array.from({ length: startDayOffset }).map((_, i) => (
               <div key={`blank-${i}`} className="min-h-[120px] rounded-2xl bg-[#090b14]/50 border border-slate-900" />
