@@ -1,0 +1,130 @@
+[
+  {
+    "id": "pl-dock-logistics",
+    "name": "Boucle Logistique & Quai Départ/Retour",
+    "description": "Affichage dynamique des départs du jour, consignes de chargement, retours urgents et règles de sécurité.",
+    "loopMode": "infinite",
+    "totalDurationSeconds": 45,
+    "items": [
+      {
+        "id": "item-pl-1",
+        "type": "kroma_view",
+        "title": "Tableau Départs & Retours du Jour",
+        "durationSeconds": 15,
+        "kromaViewType": "rentals_dispatch",
+        "caption": "Suivi en direct des expéditions et réceptions de matériel"
+      },
+      {
+        "id": "item-pl-2",
+        "type": "image",
+        "title": "Consignes de Sécurité & Contrôle Malles",
+        "url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80",
+        "durationSeconds": 10,
+        "caption": "Protocole : Toujours scanner le code-barres avant mise en baie de transport."
+      },
+      {
+        "id": "item-pl-3",
+        "type": "kroma_view",
+        "title": "Planning des Réservations & Tournages",
+        "durationSeconds": 12,
+        "kromaViewType": "calendar_planning",
+        "caption": "Vue temps réel du calendrier régie"
+      },
+      {
+        "id": "item-pl-4",
+        "type": "text_slide",
+        "title": "Rappel Contrôle VGP & Batteries",
+        "durationSeconds": 8,
+        "customHeading": "⚡ ZONE CHARGE BATTERIES V-MOUNT",
+        "customBody": "Toute batterie non chargée à 100% doit être déposée sur le banc n°3.",
+        "bgColor": "#1e1b4b",
+        "textColor": "#a5b4fc"
+      }
+    ],
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "pl-studio-regie",
+    "name": "Boucle Plateau & Régie Vidéo Studio A",
+    "description": "Planning des captations, fiches techniques caméras, retours plateaux et messages régisseur.",
+    "loopMode": "infinite",
+    "totalDurationSeconds": 40,
+    "items": [
+      {
+        "id": "item-pl-5",
+        "type": "kroma_view",
+        "title": "Planning Studios & Réservations",
+        "durationSeconds": 15,
+        "kromaViewType": "calendar_planning",
+        "caption": "Planning d'occupation des plateaux et cabines insonorisées"
+      },
+      {
+        "id": "item-pl-6",
+        "type": "image",
+        "title": "Plan de Feu & Implantation Lumière",
+        "url": "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=1200&auto=format&fit=crop&q=80",
+        "durationSeconds": 10,
+        "caption": "Studio A : Grille d'éclairage DMX et tubes LED sans fil"
+      },
+      {
+        "id": "item-pl-7",
+        "type": "text_slide",
+        "title": "Directives Enregistrement Live",
+        "durationSeconds": 10,
+        "customHeading": "🔴 ON AIR - SILENCE SUR LE PLATEAU",
+        "customBody": "Accès régie restreint aux techniciens accrédités pendant les prises.",
+        "bgColor": "#450a0a",
+        "textColor": "#fca5a5"
+      },
+      {
+        "id": "item-pl-8",
+        "type": "pdf",
+        "title": "Fiche Technique Régie vMix & Dante",
+        "durationSeconds": 12,
+        "pdfPageCount": 3,
+        "pdfScrollSpeedSeconds": 4,
+        "caption": "Synoptique des liaisons réseau RJ45 et flux NDI"
+      }
+    ],
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "pl-reception-4k",
+    "name": "Boucle Accueil & Showroom Démo 4K",
+    "description": "Présentation des nouveautés parcs caméras, vidéos institutionnelles et catalogue interactif.",
+    "loopMode": "infinite",
+    "totalDurationSeconds": 45,
+    "items": [
+      {
+        "id": "item-pl-9",
+        "type": "video",
+        "title": "Showreel Caméras Cinéma & Optiques Anamorphiques",
+        "url": "https://assets.mixkit.co/videos/preview/mixkit-camera-operator-filming-in-a-studio-41126-large.mp4",
+        "durationSeconds": 18,
+        "caption": "Parc Caméras Sony FX3/FX6 & Optiques Cooke / Zeiss"
+      },
+      {
+        "id": "item-pl-10",
+        "type": "image",
+        "title": "Nouveau Parc Éclairage Nanlite & Astera",
+        "url": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&auto=format&fit=crop&q=80",
+        "durationSeconds": 12,
+        "caption": "Disponible à la location au Dépôt Central Paris-Nord"
+      },
+      {
+        "id": "item-pl-11",
+        "type": "text_slide",
+        "title": "Bienvenue chez KROMA OS",
+        "durationSeconds": 10,
+        "customHeading": "BIENVENUE CHEZ KROMA AUDIOVISUEL",
+        "customBody": "Comptoir ouvert de 8h30 à 19h00. Récupération & retours express au Quai A.",
+        "bgColor": "#0f172a",
+        "textColor": "#38bdf8"
+      }
+    ],
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  }
+]

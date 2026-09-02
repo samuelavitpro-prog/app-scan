@@ -145,7 +145,7 @@ export const KioskDisplayReceiver: React.FC<KioskDisplayReceiverProps> = ({
     let eventSource: EventSource | null = null;
     try {
       eventSource = new EventSource('/api/events');
-      eventSource.onmessage = (event) => {
+      const handleDisplayEvent = (event: MessageEvent) => {
         try {
           const parsed = JSON.parse(event.data);
           
@@ -178,6 +178,13 @@ export const KioskDisplayReceiver: React.FC<KioskDisplayReceiverProps> = ({
           // ignore parsing error
         }
       };
+
+      // The server uses named SSE events. Listening explicitly is required;
+      // EventSource.onmessage only receives unnamed `message` events.
+      eventSource.addEventListener('display_paired', handleDisplayEvent);
+      eventSource.addEventListener('display_unpaired', handleDisplayEvent);
+      eventSource.addEventListener('display_command', handleDisplayEvent);
+      eventSource.addEventListener('displays_updated', handleDisplayEvent);
     } catch (e) {
       // SSE fallback handled by polling
     }

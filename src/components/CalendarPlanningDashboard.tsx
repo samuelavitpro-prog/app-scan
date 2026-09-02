@@ -756,7 +756,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
   };
 
   return (
-    <div className="space-y-5 animate-fadeIn font-sans">
+    <div className="locasyst-calendar-screen space-y-5 animate-fadeIn font-sans">
       {/* ========================================================================= */}
       {/* SECOND SCREEN BROADCAST HUD OVERLAY MODE */}
       {/* ========================================================================= */}

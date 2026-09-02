@@ -673,6 +673,7 @@ export interface QuoteItemLine {
   brand?: string;
   category?: string;
   quantity: number;
+  shortageQuantity?: number; // Quantité non couverte par le parc propre, à sous-louer
   unitPricePerDay: number;
   days: number;
   discountPercent?: number; // Taux de remise R %
@@ -1174,8 +1175,6 @@ export interface NetworkDisplayScreen {
   createdAt: string;
   updatedAt: string;
 }
-
-
 
 
 

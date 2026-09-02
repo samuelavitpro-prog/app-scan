@@ -4,11 +4,12 @@ import {
   Plus,
   Search,
   Calendar,
+  Truck,
+  Copy,
   Printer,
   Trash2,
   Edit2,
   TrendingUp,
-  Clapperboard,
   Globe,
 } from "lucide-react";
 import {
@@ -24,9 +25,10 @@ import { DocumentPrintModal } from "./DocumentPrintModal";
 import { ClientPortalModal } from "./ClientPortalModal";
 import { LocasystQuoteBuilderModal } from "./LocasystQuoteBuilderModal";
 import { SAMPLE_LUMENS_QUOTE } from "../data/sampleLumensQuote";
-import { DEFAULT_AV_INVENTORY_ITEMS } from "../data/defaultCatalog";
+import { WorkspaceProfile } from "../config/workspaceProfiles";
 
 interface QuotesDashboardProps {
+  activeProfile?: WorkspaceProfile;
   quotes?: ClientQuote[];
   inventoryItems?: InventoryItem[];
   inventory?: InventoryItem[];
@@ -38,6 +40,8 @@ interface QuotesDashboardProps {
   onAddQuote?: (quote: Partial<ClientQuote>) => Promise<boolean>;
   onUpdateQuote?: (id: string, updates: Partial<ClientQuote>) => Promise<boolean>;
   onDeleteQuote?: (id: string) => Promise<boolean>;
+  onOpenDossiers?: () => void;
+  onConvertToDossier?: (quote: ClientQuote) => Promise<boolean>;
   initialPrefillTech?: TechnicianProfile | null;
   initialPrefillStudio?: StudioSpace | null;
   prefillTech?: TechnicianProfile | null;
@@ -48,6 +52,7 @@ interface QuotesDashboardProps {
 }
 
 export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
+  activeProfile,
   quotes = [],
   inventoryItems = [],
   inventory = [],
@@ -76,6 +81,8 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   onAddQuote,
   onUpdateQuote,
   onDeleteQuote,
+  onOpenDossiers,
+  onConvertToDossier,
   prefillClient = null,
 }) => {
   const safeQuotes = quotes || [];
@@ -86,16 +93,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   
   const safeInventoryItems = useMemo(() => {
     const raw = (inventoryItems && inventoryItems.length > 0) ? inventoryItems : ((inventory && inventory.length > 0) ? inventory : []);
-    if (raw.length === 0) {
-      return DEFAULT_AV_INVENTORY_ITEMS;
-    }
-    const merged = [...raw];
-    DEFAULT_AV_INVENTORY_ITEMS.forEach((def) => {
-      if (!merged.some((i) => i.id === def.id || i.name.toLowerCase() === def.name.toLowerCase())) {
-        merged.push(def);
-      }
-    });
-    return merged;
+    return raw;
   }, [inventoryItems, inventory]);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,6 +102,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const [showPrintModal, setShowPrintModal] = useState<ClientQuote | null>(null);
   const [showPortalModalQuote, setShowPortalModalQuote] = useState<ClientQuote | null>(null);
   const [editingQuote, setEditingQuote] = useState<ClientQuote | null>(null);
+  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const handleOpenCreateModal = () => {
     setEditingQuote(null);
@@ -113,6 +112,17 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const handleOpenEditModal = (q: ClientQuote) => {
     setEditingQuote(q);
     setShowBuilderModal(true);
+  };
+
+  const handleDuplicateQuote = async (quote: ClientQuote) => {
+    if (!onAddQuote) return;
+    const { id: _id, quoteNumber: _quoteNumber, createdAt: _createdAt, updatedAt: _updatedAt, rentalStatus: _rentalStatus, ...copy } = quote;
+    await onAddQuote({
+      ...copy,
+      status: "draft",
+      date: new Date().toISOString().split("T")[0],
+      rentalItems: (quote.rentalItems || []).map((line) => ({ ...line, returnStatus: undefined, shortageQuantity: undefined })),
+    });
   };
 
   const handleSaveQuote = async (payload: Partial<ClientQuote>) => {
@@ -128,6 +138,21 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
     setShowBuilderModal(false);
   };
 
+  const handleConvertToDossier = async (quote: ClientQuote) => {
+    if (!onUpdateQuote) return;
+    const confirmed = window.confirm(
+      `Créer le dossier d'exploitation ${quote.quoteNumber} ?`
+    );
+    if (!confirmed) return;
+    const converted = onConvertToDossier
+      ? await onConvertToDossier(quote)
+      : await onUpdateQuote(quote.id, {
+          status: quote.status === "draft" || quote.status === "sent" ? "accepted" : quote.status,
+          rentalStatus: "preparing",
+        });
+    if (converted) onOpenDossiers?.();
+  };
+
   const filteredQuotes = safeQuotes.filter((q) => {
     const query = searchQuery.toLowerCase();
     const matchesQuery =
@@ -140,6 +165,8 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
     const matchesStatus = statusFilter === "all" || q.status === statusFilter;
     return matchesQuery && matchesStatus;
   });
+
+  const selectedQuote = filteredQuotes.find((q) => q.id === selectedQuoteId) || filteredQuotes[0] || null;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -188,27 +215,14 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   }, 0);
 
   return (
-    <div id="quotes-dashboard" className="space-y-6">
-      {/* Top Banner Pro Style Locasyst / Manatís */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-[#0f1322] via-[#161c36] to-[#0f1322] border border-[#232a48] shadow-xl shadow-black/40">
+    <div id="quotes-dashboard" className="locasyst-quotes-screen space-y-4">
+      <div className="quotes-screen-header">
         <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <div className="p-2 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400">
-              <Clapperboard className="w-5 h-5" />
-            </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
-              Devis & Facturation Audiovisuelle Cinéma
-            </h1>
-            <span className="px-2.5 py-0.5 text-xs font-bold bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">
-              Barème Dégressif + Chapitres Métiers + Sous-Location
-            </span>
-          </div>
-          <p className="text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
-            Assistant de chiffrage simplifié en <strong className="text-slate-200">3 étapes claires</strong> (Projet/Dates ➔ Matériel/Packs ➔ Conditions/Totaux) conforme aux standards Locasyst.
-          </p>
+          <div className="screen-eyebrow">COMMERCIAL · {activeProfile?.shortLabel || "PRODUCTION"}</div>
+          <h1>{activeProfile?.copy.quotesTitle || "Affaires & devis"}</h1>
+          <p>{activeProfile?.copy.quotesDescription || "Chiffrage, validation et suivi des dossiers de production."}</p>
         </div>
-
-        <div className="flex items-center gap-3 self-start lg:self-center flex-wrap">
+        <div className="quotes-header-actions">
           <button
             id="btn-load-lumens-template"
             onClick={() => {
@@ -224,25 +238,25 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                 setShowPrintModal(SAMPLE_LUMENS_QUOTE as any);
               }
             }}
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="secondary-action"
           >
             <FileText className="w-4 h-4" />
-            <span>📄 Modèle Devis Lumens (3 Pages)</span>
+            <span>Modèles de documents</span>
           </button>
 
           <button
             id="btn-create-new-quote"
             onClick={handleOpenCreateModal}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="primary-action"
           >
             <Plus className="w-4 h-4" />
-            Nouveau Devis Audiovisuel Pro
+            Nouveau devis
           </button>
         </div>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="quotes-summary-strip">
         <div className="p-5 rounded-2xl bg-[#121626] border border-[#232a48] shadow-md">
           <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Volume Devis Émis</span>
           <p className="text-2xl font-black text-slate-100 mt-1">
@@ -273,14 +287,14 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-[#121626] border border-[#232a48]">
+      <div className="quotes-toolbar">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher projet, film, client, N° devis..."
+            placeholder="Rechercher une affaire, un client ou un devis..."
             className="w-full bg-[#181d33] border border-[#273052] rounded-xl pl-10 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
         </div>
@@ -311,8 +325,14 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
         </div>
       </div>
 
-      {/* Quotes Table */}
-      <div className="rounded-3xl bg-[#121626] border border-[#232a48] overflow-hidden shadow-xl">
+      <div className="quotes-list-heading">
+        <div><strong>Dossiers commerciaux</strong><span>{filteredQuotes.length} résultat{filteredQuotes.length > 1 ? "s" : ""}</span></div>
+        <span className="quotes-list-hint">Sélectionnez une ligne pour ouvrir le dossier</span>
+      </div>
+
+      {/* Quotes + operational detail */}
+      <div className="quotes-workspace">
+      <div className="quotes-table-shell">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-[#181d33] border-b border-[#232a48] text-[11px] uppercase tracking-wider text-slate-400 font-bold">
@@ -332,7 +352,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                 filteredQuotes.map((q) => {
                   const subCount = (q.rentalItems || []).filter((i) => i.isSubRental).length;
                   return (
-                    <tr key={q.id} className="hover:bg-[#161c33] transition-colors">
+                    <tr key={q.id} onClick={() => setSelectedQuoteId(q.id)} className={`quote-row hover:bg-[#161c33] transition-colors ${selectedQuote?.id === q.id ? "quote-row-selected" : ""}`}>
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-white flex items-center gap-1.5">
                           <FileText className="w-3.5 h-3.5 text-indigo-400" />
@@ -471,6 +491,61 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
             </tbody>
           </table>
         </div>
+      </div>
+
+      <aside className="quote-detail-panel">
+        {selectedQuote ? (
+          <>
+            <div className="quote-detail-topline">
+              <span>DOSSIER COMMERCIAL</span>
+              {getStatusBadge(selectedQuote.status)}
+            </div>
+            <div className="quote-detail-title">
+              <div className="quote-document-icon"><FileText className="w-5 h-5" /></div>
+              <div>
+                <h2>{selectedQuote.projectName || selectedQuote.clientCompany || selectedQuote.clientName}</h2>
+                <p>{selectedQuote.quoteNumber} · créé le {selectedQuote.date}</p>
+              </div>
+            </div>
+
+            <div className="quote-phase-rail">
+              {[
+                ["Devis", true],
+                ["Préparation", selectedQuote.status === "accepted" || selectedQuote.status === "invoiced"],
+                ["Livraison", selectedQuote.status === "invoiced"],
+                ["Reprise", false],
+              ].map(([label, complete], index) => (
+                <div className={`quote-phase ${complete ? "complete" : index === 0 ? "current" : ""}`} key={String(label)}>
+                  <span>{index + 1}</span><strong>{label}</strong>
+                </div>
+              ))}
+            </div>
+
+            <div className="quote-detail-section">
+              <div className="detail-label">CLIENT / PRODUCTION</div>
+              <strong>{selectedQuote.clientName || "Client à renseigner"}</strong>
+              <p>{selectedQuote.productionCompany || selectedQuote.clientCompany || "Société non renseignée"}</p>
+            </div>
+            <div className="quote-detail-grid">
+              <div><span>DATES D’EXPLOITATION</span><strong>{selectedQuote.shootStartDate || selectedQuote.startDate || "À définir"}</strong><small>au {selectedQuote.shootEndDate || selectedQuote.endDate || "—"}</small></div>
+              <div><span>DURÉE</span><strong>{selectedQuote.shootDaysCount || selectedQuote.durationDays || 1} jour(s)</strong><small>Coeff. {selectedQuote.globalRentalCoefficient || 1}</small></div>
+              <div><span>MONTANT HT</span><strong>{(selectedQuote.totalHT || 0).toLocaleString("fr-FR")} €</strong></div>
+              <div><span>MONTANT TTC</span><strong className="detail-total">{(selectedQuote.totalTTC || 0).toLocaleString("fr-FR")} €</strong></div>
+            </div>
+            <div className="quote-detail-section quote-detail-actions">
+              {!selectedQuote.rentalStatus && (
+                <button onClick={() => handleConvertToDossier(selectedQuote)} className="detail-primary detail-operation-button"><Truck className="w-4 h-4" /> Créer le dossier d’exploitation</button>
+              )}
+              <button onClick={() => handleOpenEditModal(selectedQuote)} className="detail-primary"><Edit2 className="w-4 h-4" /> Modifier le devis</button>
+              <button onClick={() => handleDuplicateQuote(selectedQuote)}><Copy className="w-4 h-4" /> Dupliquer le devis</button>
+              <button onClick={() => setShowPrintModal(selectedQuote)}><Printer className="w-4 h-4" /> Générer un document</button>
+              <button onClick={() => setShowPortalModalQuote(selectedQuote)}><Globe className="w-4 h-4" /> Ouvrir l’espace client</button>
+            </div>
+          </>
+        ) : (
+          <div className="quote-empty-detail"><FileText className="w-8 h-8" /><strong>Aucun dossier sélectionné</strong><p>Créez un devis ou sélectionnez une affaire dans la liste.</p></div>
+        )}
+      </aside>
       </div>
 
       {/* 3-STEP LOCASYST QUOTE BUILDER WIZARD */}

@@ -2252,8 +2252,8 @@ function logActivity(action: string, title: string, details: string, device: "mo
 // API ROUTES
 // -------------------------------------------------------------
 
-// SSE Subscription Endpoint for Real-Time synchronization
-app.get("/api/sync/stream", (req, res) => {
+// Shared SSE subscription endpoint for the control room and kiosk receivers.
+function subscribeToSSE(req: express.Request, res: express.Response) {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -2268,7 +2268,32 @@ app.get("/api/sync/stream", (req, res) => {
   req.on("close", () => {
     sseClients = sseClients.filter((c) => c.id !== clientId);
   });
-});
+}
+
+// Main application stream.
+app.get("/api/sync/stream", subscribeToSSE);
+// Dedicated alias used by TV / Raspberry Pi receivers.
+app.get("/api/events", subscribeToSSE);
+
+// A receiver is considered offline after three missed heartbeats. This keeps
+// the control room truthful even when a TV is unplugged or loses its network.
+setInterval(() => {
+  const now = Date.now();
+  let changed = false;
+  displays = displays.map((display) => {
+    const lastPing = Date.parse(display.lastPingAt || "");
+    const shouldBeOffline = !Number.isFinite(lastPing) || now - lastPing > 30_000;
+    if (shouldBeOffline && display.status === "online") {
+      changed = true;
+      return { ...display, status: "offline", updatedAt: new Date().toISOString() };
+    }
+    return display;
+  });
+  if (changed) {
+    saveData(DISPLAYS_FILE, displays);
+    broadcastUpdate("displays_updated", displays);
+  }
+}, 10_000);
 
 // Connectivity healthcheck / ping endpoint
 app.get("/api/ping", (req, res) => {

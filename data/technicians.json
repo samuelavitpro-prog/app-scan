@@ -1,0 +1,110 @@
+[
+  {
+    "id": "tech-01",
+    "name": "Julien Rivoire",
+    "primaryRole": "Ingénieur du Son / Opérateur Podcast",
+    "specialties": [
+      "Son",
+      "Streaming & Broadcast"
+    ],
+    "email": "j.rivoire@stockvision.fr",
+    "phone": "+33 6 11 22 33 44",
+    "dailyRate": 420,
+    "hourlyRate": 55,
+    "status": "available",
+    "bio": "Spécialiste captation podcast, mixage en direct et sonorisation plateau depuis plus de 8 ans.",
+    "skills": [
+      "Pro Tools",
+      "Rodecaster Pro",
+      "Yamaha QL/CL",
+      "Dante Audio",
+      "OBS Studio"
+    ],
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+    "rating": 4.9,
+    "assignedWarehouse": "Siège Principal & Studios",
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "tech-02",
+    "name": "Camille Leroux",
+    "primaryRole": "Cadreur Vidéo & Opérateur PTZ",
+    "specialties": [
+      "Vidéo",
+      "Cadre",
+      "Streaming & Broadcast"
+    ],
+    "email": "c.leroux@stockvision.fr",
+    "phone": "+33 6 55 44 33 22",
+    "dailyRate": 450,
+    "hourlyRate": 60,
+    "status": "available",
+    "bio": "Opératrice caméra multi-flux, cadreur stabilisateur Gimbal et régie tourelles pour émissions live.",
+    "skills": [
+      "Sony FX3 / FX6",
+      "Ronin RS3 Pro",
+      "Blackmagic ATEM",
+      "vMix",
+      "Optiques Cinéma"
+    ],
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+    "rating": 4.8,
+    "assignedWarehouse": "Plateau Tournage Alpha",
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "tech-03",
+    "name": "David Vasseur",
+    "primaryRole": "Régisseur Général & Chef de Plateau",
+    "specialties": [
+      "Régie",
+      "Chef de Plateau",
+      "Machinerie"
+    ],
+    "email": "d.vasseur@stockvision.fr",
+    "phone": "+33 6 77 88 99 00",
+    "dailyRate": 520,
+    "hourlyRate": 70,
+    "status": "available",
+    "bio": "Coordination globale des équipes techniques, sécurité des espaces, plannings et gestion du matériel.",
+    "skills": [
+      "Coordination Régie",
+      "Normes ERP/Sécurité",
+      "Accroches & Grill",
+      "Gestion Logistique"
+    ],
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80",
+    "rating": 5,
+    "assignedWarehouse": "Hub Central Paris-Nord",
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "tech-04",
+    "name": "Élodie Martin",
+    "primaryRole": "Éclairagiste & Pupitreur Lumière",
+    "specialties": [
+      "Lumière",
+      "Machinerie"
+    ],
+    "email": "e.martin@stockvision.fr",
+    "phone": "+33 6 88 99 11 22",
+    "dailyRate": 400,
+    "hourlyRate": 50,
+    "status": "available",
+    "bio": "Création d'ambiances lumineuses studio, gestion DMX/CRMX sans fil et projecteurs LED haute puissance.",
+    "skills": [
+      "GrandMA / ChamSys",
+      "Astera App",
+      "Aputure Sidus Link",
+      "Colorimétrie CRI 98+"
+    ],
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80",
+    "rating": 4.9,
+    "assignedWarehouse": "Zone Éclairage B",
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  }
+]

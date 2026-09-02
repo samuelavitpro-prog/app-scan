@@ -224,7 +224,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#080a10] text-slate-100 flex flex-col justify-between relative overflow-hidden font-sans select-none">
+    <div className="login-page-shell min-h-screen w-full bg-[#080a10] text-slate-100 flex flex-col justify-between relative overflow-hidden font-sans select-none">
       {/* Background glowing gradients */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />

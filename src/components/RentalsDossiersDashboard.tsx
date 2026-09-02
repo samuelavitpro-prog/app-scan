@@ -141,13 +141,11 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
     }
   };
 
-  // Consider quotes accepted, invoiced, paid or with rentalStatus as rental dossiers
+  // A quote becomes an operational dossier only after explicit conversion.
+  // Accepted quotes without rentalStatus remain commercial documents.
   const rentalQuotes = safeQuotes.filter(
     (q) =>
       q && (
-        q.status === "accepted" ||
-        q.status === "invoiced" ||
-        q.status === "paid" ||
         q.rentalStatus !== undefined
       )
   );
@@ -728,6 +726,17 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
                     </button>
 
                     {/* PRINT DROPDOWN / BUTTON */}
+                    {(quote.rentalItems || []).some((item) => item.isSubRental) && (
+                      <button
+                        onClick={() => setPrintModalData({ quote, type: "bon_sous_location" })}
+                        className="py-1.5 px-2.5 rounded-xl bg-amber-950/70 hover:bg-amber-900 border border-amber-500/40 text-amber-200 text-xs font-bold flex items-center gap-1 transition"
+                        title="Générer le bon de sous-location fournisseur"
+                      >
+                        <Truck className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Bon sous-loc.</span>
+                      </button>
+                    )}
+
                     <div className="relative">
                       <button
                         onClick={() =>
@@ -759,6 +768,11 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
                       className="px-2 py-1 rounded-lg bg-[#14182b] border border-[#242b4a] text-slate-300 text-[11px] flex items-center gap-1"
                     >
                       <span className="font-bold text-indigo-400">{it.quantity}x</span> {it.name}
+                      {it.shortageQuantity && it.shortageQuantity > 0 ? (
+                        <span className="px-1 py-0.2 rounded bg-amber-950 text-amber-300 text-[9px] font-black uppercase border border-amber-500/30">
+                          {it.shortageQuantity} manquant(s)
+                        </span>
+                      ) : null}
                       {it.missingQty && it.missingQty > 0 ? (
                         <span className="px-1 py-0.2 rounded bg-rose-950 text-rose-300 text-[9px] font-black uppercase border border-rose-500/30">
                           {it.missingQty} Manquant(s)

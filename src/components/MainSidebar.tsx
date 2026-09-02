@@ -44,6 +44,7 @@ import {
   SubscriptionTier,
 } from "../types";
 import { canAccessModule } from "../utils/subscriptionPlans";
+import { WorkspaceProfile, WorkspaceProfileId, WORKSPACE_PROFILES } from "../config/workspaceProfiles";
 
 interface MainSidebarProps {
   activeTab: MainAppNavTab;
@@ -73,6 +74,9 @@ interface MainSidebarProps {
   onToggleSplitMode?: () => void;
   darkMode?: boolean;
   onToggleDarkMode?: () => void;
+  activeProfile?: WorkspaceProfile;
+  onChangeProfile?: (profileId: WorkspaceProfileId) => void;
+  visibleTabs?: MainAppNavTab[];
 }
 
 export const MainSidebar: React.FC<MainSidebarProps> = ({
@@ -101,8 +105,12 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
   onToggleSplitMode,
   darkMode = true,
   onToggleDarkMode,
+  activeProfile = WORKSPACE_PROFILES.production,
+  onChangeProfile,
+  visibleTabs = activeProfile.visibleTabs,
 }) => {
   const [showDepotDropdown, setShowDepotDropdown] = useState(false);
+  const [showAdvancedModules, setShowAdvancedModules] = useState(false);
 
   const safeDepots = depots || [];
   const activeDepot = safeDepots.find((d) => d.id === activeDepotId) || {
@@ -134,7 +142,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
   const displaysAccess = canAccessModule("displays", subscription);
 
   return (
-    <aside className="w-full lg:w-64 bg-[#161a2b] rounded-3xl border border-slate-700/60 p-3.5 shadow-xl flex flex-col justify-between space-y-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+    <aside className={`locasyst-sidebar ${showAdvancedModules ? "sidebar-advanced-open" : "sidebar-advanced-closed"} w-full lg:w-64 bg-[#161a2b] rounded-3xl border border-slate-700/60 p-3.5 shadow-xl flex flex-col justify-between space-y-4 max-h-[calc(100vh-2rem)] overflow-y-auto`}>
       <div className="space-y-4">
         {/* Brand Header */}
         <div className="px-3 pt-1 pb-3 border-b border-slate-700/60 flex items-center justify-between">
@@ -149,7 +157,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
                   {subscription?.tier?.toUpperCase() || "OS"}
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400 font-medium">Broadcast & Parc Pro</div>
+              <div className="text-[10px] text-slate-400 font-medium">{activeProfile.label}</div>
             </div>
           </div>
 
@@ -160,6 +168,28 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
             }`}
             title={isOnline ? "Connecté au Cloud" : "Mode Hors-ligne"}
           />
+        </div>
+
+        {/* WORKSPACE PROFILE */}
+        <div className={`p-2.5 rounded-2xl border ${activeProfile.theme.accentSoft}`}>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] uppercase tracking-wider font-bold opacity-80">Univers métier</span>
+            <span className="text-[9px] font-bold uppercase opacity-70">Profil actif</span>
+          </div>
+          <select
+            id="workspace-profile-selector"
+            value={activeProfile.id}
+            onChange={(event) => onChangeProfile?.(event.target.value as WorkspaceProfileId)}
+            className="w-full rounded-xl bg-[#0e111d]/70 border border-current/20 px-2 py-2 text-xs font-bold text-white outline-none cursor-pointer"
+            aria-label="Choisir l'univers métier"
+          >
+            {Object.values(WORKSPACE_PROFILES).map((profile) => (
+              <option key={profile.id} value={profile.id} className="bg-[#161a2b] text-white">
+                {profile.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-[10px] opacity-75 leading-relaxed">{activeProfile.description}</p>
         </div>
 
         {/* SUBSCRIPTION & PLAN BANNER WIDGET */}
@@ -440,8 +470,16 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
 
         {/* Group 3: DÉPÔT, LOGISTIQUE & PARC */}
         <div className="space-y-1">
-          <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Dépôt, Logistique & Parc
+          <div className="flex items-center justify-between px-3 py-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Parc & équipe</span>
+            <button
+              type="button"
+              className="sidebar-advanced-toggle text-[10px] font-bold text-[#3978a8] hover:text-[#2f668f]"
+              onClick={() => setShowAdvancedModules((value) => !value)}
+              aria-expanded={showAdvancedModules}
+            >
+              {showAdvancedModules ? "Réduire" : "Plus"}
+            </button>
           </div>
 
           <button
@@ -465,11 +503,11 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
             </span>
           </button>
 
-          <button
+            <button
             id="nav-tab-flightcases"
             type="button"
             onClick={() => onSelectTab("flightcases")}
-            className={`w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
+            className={`${!visibleTabs.includes("flightcases") ? "hidden " : ""}w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
               activeTab === "flightcases"
                 ? "bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25"
                 : "text-slate-300 hover:text-white hover:bg-[#1f253d]"
@@ -496,7 +534,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
             id="nav-tab-maintenance"
             type="button"
             onClick={() => onSelectTab("maintenance")}
-            className={`w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
+            className={`${!visibleTabs.includes("maintenance") ? "hidden " : ""}w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
               activeTab === "maintenance"
                 ? "bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25"
                 : "text-slate-300 hover:text-white hover:bg-[#1f253d]"
@@ -523,7 +561,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
             id="nav-tab-studios"
             type="button"
             onClick={() => onSelectTab("studios")}
-            className={`w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
+            className={`${!visibleTabs.includes("studios") ? "hidden " : ""}w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
               activeTab === "studios"
                 ? "bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25"
                 : "text-slate-300 hover:text-white hover:bg-[#1f253d]"
@@ -550,7 +588,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
             id="nav-tab-technicians"
             type="button"
             onClick={() => onSelectTab("technicians")}
-            className={`w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
+            className={`${!visibleTabs.includes("technicians") ? "hidden " : ""}w-full flex items-center justify-between p-2.5 rounded-2xl text-xs font-semibold transition ${
               activeTab === "technicians"
                 ? "bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/25"
                 : "text-slate-300 hover:text-white hover:bg-[#1f253d]"
@@ -577,7 +615,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
         {/* Group 4: SYSTÈME */}
         <div className="space-y-1">
           <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Système
+            Réglages
           </div>
 
           <button

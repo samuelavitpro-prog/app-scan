@@ -1,0 +1,144 @@
+[
+  {
+    "id": "studio-podcast-1",
+    "name": "Studio Podcast & Live Stream 'Le Miroir'",
+    "type": "podcast",
+    "description": "Studio insonorisé haute fidélité pour 4 intervenants avec caméras 4K tourelles PTZ, table de mixage broadcast et éclairage d'ambiance RGBW.",
+    "capacity": 6,
+    "surfaceM2": 28,
+    "hourlyRate": 75,
+    "dailyRate": 450,
+    "imageUrl": "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=800&auto=format&fit=crop&q=80",
+    "colorBadge": "indigo",
+    "location": "Bâtiment A - 1er Étage (Zone Acoustique)",
+    "fixedEquipment": [
+      {
+        "itemId": "item-101",
+        "customName": "Microphones Shure SM58 / SM7B",
+        "requiredQuantity": 4,
+        "isMandatory": true,
+        "notes": "Avec bonnettes et bras articulés"
+      },
+      {
+        "itemId": "item-104",
+        "customName": "Station Régie MacBook Pro & Mixage",
+        "requiredQuantity": 1,
+        "isMandatory": true,
+        "notes": "Logiciel de stream OBS / vMix configuré"
+      },
+      {
+        "itemId": "item-103",
+        "customName": "Caméra Tourelle Vidéo Sony FX3",
+        "requiredQuantity": 2,
+        "isMandatory": false,
+        "notes": "Pour captation multi-angles"
+      },
+      {
+        "itemId": "item-105",
+        "customName": "Kit Projecteurs & Tubes LED Astera",
+        "requiredQuantity": 2,
+        "isMandatory": false,
+        "notes": "Éclairage 3 points"
+      }
+    ],
+    "status": "available",
+    "bookings": [
+      {
+        "id": "book-01",
+        "studioId": "studio-podcast-1",
+        "clientName": "Podcast 'Tech Horizon'",
+        "clientContact": "julien@techhorizon.fr",
+        "startDate": "2026-09-01T18:24:34.505Z",
+        "endDate": "2026-09-01T22:24:34.505Z",
+        "rateType": "hourly",
+        "unitsCount": 4,
+        "totalAmountHT": 300,
+        "status": "confirmed",
+        "assignedTechnicians": [
+          {
+            "technicianId": "tech-01",
+            "technicianName": "Julien Rivoire",
+            "role": "Ingénieur Son"
+          }
+        ],
+        "notes": "Enregistrement épisode #42 avec 3 invités.",
+        "createdAt": "2026-08-31T18:24:34.505Z"
+      }
+    ],
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "studio-video-2",
+    "name": "Plateau Tournage Vidéo Cyclorama 'Studio Alpha'",
+    "type": "video_set",
+    "description": "Grand plateau de tournage de 95m² avec cyclorama blanc 3 faces incurvé, grill technique motorisé, loge maquillage et accès direct quai de déchargement.",
+    "capacity": 30,
+    "surfaceM2": 95,
+    "hourlyRate": 160,
+    "dailyRate": 980,
+    "imageUrl": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop&q=80",
+    "colorBadge": "emerald",
+    "location": "Rez-de-chaussée - Hangar Technique",
+    "fixedEquipment": [
+      {
+        "itemId": "item-103",
+        "customName": "Caméras Sony FX3 Cinéma 4K",
+        "requiredQuantity": 3,
+        "isMandatory": true,
+        "notes": "Avec optiques GM 24-70 et 70-200"
+      },
+      {
+        "itemId": "item-105",
+        "customName": "Kit Tubes LED Astera Titan",
+        "requiredQuantity": 4,
+        "isMandatory": true,
+        "notes": "Contrôleur sans fil CRMX inclus"
+      },
+      {
+        "itemId": "item-104",
+        "customName": "MacBook Pro Régie & Monitoring",
+        "requiredQuantity": 1,
+        "isMandatory": true,
+        "notes": "Sorties HDMI et SDI"
+      }
+    ],
+    "status": "available",
+    "bookings": [],
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  },
+  {
+    "id": "studio-audio-3",
+    "name": "Cabine Voix Off & Post-Production 'Acoustik'",
+    "type": "audio_booth",
+    "description": "Cabine insonorisée ultra-isolée (-45dB) avec écoutes de monitoring Neumann, micro voix haut de gamme et écran retour vidéo pour doublage.",
+    "capacity": 3,
+    "surfaceM2": 15,
+    "hourlyRate": 55,
+    "dailyRate": 350,
+    "imageUrl": "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=80",
+    "colorBadge": "amber",
+    "location": "Bâtiment A - 2ème Étage",
+    "fixedEquipment": [
+      {
+        "itemId": "item-101",
+        "customName": "Microphones Shure SM58 / SM7B",
+        "requiredQuantity": 2,
+        "isMandatory": true,
+        "notes": "Avec préampli Cloudlifter"
+      },
+      {
+        "itemId": "item-104",
+        "customName": "Station Montage Son MacBook Pro",
+        "requiredQuantity": 1,
+        "isMandatory": true,
+        "notes": "Pro Tools & Logic Pro"
+      }
+    ],
+    "status": "available",
+    "bookings": [],
+    "createdAt": "2026-08-31T18:24:34.505Z",
+    "updatedAt": "2026-08-31T18:24:34.505Z"
+  }
+]

@@ -51,7 +51,6 @@ import {
 } from "../utils/coefficients";
 import { calculateQuoteLogistics } from "../utils/logisticsCalculator";
 import { SAMPLE_LUMENS_QUOTE } from "../data/sampleLumensQuote";
-import { DEFAULT_AV_INVENTORY_ITEMS } from "../data/defaultCatalog";
 
 interface LocasystQuoteBuilderModalProps {
   editingQuote: ClientQuote | null;
@@ -233,16 +232,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
   // Safe catalog list (merges inventoryItems and comprehensive audiovisual defaults)
   const safeCatalogList = useMemo(() => {
     const base = inventoryItems && inventoryItems.length > 0 ? inventoryItems : [];
-    if (base.length === 0) {
-      return DEFAULT_AV_INVENTORY_ITEMS;
-    }
-    const merged = [...base];
-    DEFAULT_AV_INVENTORY_ITEMS.forEach((def) => {
-      if (!merged.some((i) => i.id === def.id || i.name.toLowerCase() === def.name.toLowerCase())) {
-        merged.push(def);
-      }
-    });
-    return merged;
+    return base;
   }, [inventoryItems]);
 
   // Grouped catalog items for categorized <optgroup> dropdown
@@ -856,9 +846,9 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
   return (
     <div
       id="modal-quote-builder"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
+      className="quote-builder-backdrop fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
     >
-      <div className="bg-[#0e111d] border border-[#232a48] rounded-3xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
+      <div className="quote-builder-modal bg-[#0e111d] border border-[#232a48] rounded-3xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-fadeIn">
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-[#1e243d] flex items-center justify-between bg-[#121626]">
           <div className="flex items-center gap-3">
@@ -867,13 +857,10 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
             </div>
             <div>
               <h2 className="text-base font-black text-white flex items-center gap-2">
-                {editingQuote ? `Modifier Devis : ${editingQuote.quoteNumber}` : "Assistant Création de Devis"}
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  Format Locasyst
-                </span>
+                {editingQuote ? `Modifier le devis ${editingQuote.quoteNumber}` : "Nouveau devis"}
               </h2>
               <p className="text-xs text-slate-400">
-                Processus en 3 étapes : 1. Projet & Dates ➔ 2. Matériel & Packs ➔ 3. Conditions & Totaux
+                Saisie commerciale · projet, lignes de location et conditions
               </p>
             </div>
           </div>
@@ -883,10 +870,10 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               type="button"
               onClick={handleLoadLocasystEventTemplate}
               className="py-1.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-bold text-xs flex items-center gap-1.5 transition"
-              title="Charger un exemple complet de devis (Son, Éclairage, Vidéo LED, Régie)"
+              title="Charger un modèle de devis"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              Exemple Locasyst
+              <Receipt className="w-3.5 h-3.5" />
+              Charger un modèle
             </button>
             <button
               onClick={onClose}
@@ -1656,7 +1643,8 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                       <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
                         {filteredCatalogItems.length > 0 ? (
                           filteredCatalogItems.map((item) => {
-                            const alreadyAdded = rentalItems.some((l) => l.itemId === item.id);
+                          const alreadyAdded = rentalItems.some((l) => l.itemId === item.id);
+                            const available = Math.max(0, item.availableQuantity ?? 0);
                             return (
                               <div
                                 key={item.id}
@@ -1669,8 +1657,8 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                                     <span className="text-emerald-400 font-mono font-bold">
                                       {item.rentalRatePerDay || 25} €/j
                                     </span>
-                                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
-                                      Stock: {item.availableQuantity ?? 1}
+                                    <span className={`text-[9px] px-1.5 py-0.2 rounded ${available > 0 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
+                                      Dispo: {available}
                                     </span>
                                   </div>
                                 </div>
@@ -1735,6 +1723,17 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1">
+                                  {(() => {
+                                    const stockItem = safeCatalogList.find((item) => item.id === line.itemId);
+                                    const available = Math.max(0, stockItem?.availableQuantity ?? 0);
+                                    const shortage = Math.max(0, line.quantity - available);
+                                    return shortage > 0 ? (
+                                      <div className="mb-2 flex items-center gap-2 text-[10px] font-bold text-amber-700">
+                                        <span className="rounded bg-amber-50 px-2 py-1">Manque : {shortage}</span>
+                                        <span className="font-normal text-slate-500">À arbitrer par le commercial</span>
+                                      </div>
+                                    ) : null;
+                                  })()}
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold text-white">{line.name}</span>
                                     {line.brand && (
@@ -1848,6 +1847,23 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
 
                                 {line.isSubRental && (
                                   <div className="flex items-center gap-2 animate-fadeIn">
+                                    <span className="text-slate-400">Fournisseur :</span>
+                                    <select
+                                      value={line.subRentalSupplier || ""}
+                                      onChange={(e) =>
+                                        handleUpdateEquipmentLine(index, {
+                                          subRentalSupplier: e.target.value || undefined,
+                                        })
+                                      }
+                                      className="w-36 bg-[#101424] border border-amber-500/40 rounded px-2 py-0.5 text-xs text-amber-300"
+                                    >
+                                      <option value="">À choisir</option>
+                                      {suppliers
+                                        .filter((supplier) => supplier.supplierType === "confrere_sous_location")
+                                        .map((supplier) => (
+                                          <option key={supplier.id} value={supplier.name}>{supplier.name}</option>
+                                        ))}
+                                    </select>
                                     <span className="text-slate-400">Coût Achat HT :</span>
                                     <input
                                       type="number"

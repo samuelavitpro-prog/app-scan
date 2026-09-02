@@ -86,6 +86,7 @@ import { PlanGateGuard } from "./PlanGateGuard";
 import { PlanUpgradeModal } from "./PlanUpgradeModal";
 import { canAccessModule } from "../utils/subscriptionPlans";
 import { DepotWarehouse, SubscriptionTier, ClientRecord, SupplierRecord, VenueRecord } from "../types";
+import { getWorkspaceProfile, WorkspaceProfileId } from "../config/workspaceProfiles";
 
 interface DesktopDashboardProps {
   items: InventoryItem[];
@@ -220,7 +221,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   onUpdateTechnician = async () => false,
   onDeleteTechnician = async () => false,
   onAddQuote = async () => false,
-  onUpdateQuote = async () => false,
+  onUpdateQuote = async (_id: string, _updates: Partial<ClientQuote>) => false,
   onDeleteQuote = async () => false,
   onImportInvoiceItems,
   onRefresh,
@@ -247,6 +248,11 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   onToggleDarkMode,
 }) => {
   const [activeTab, setActiveTab] = useState<MainAppNavTab>("dashboard");
+  const [activeProfileId, setActiveProfileId] = useState<WorkspaceProfileId>(() => {
+    if (typeof window === "undefined") return "production";
+    return (window.localStorage.getItem("kroma_workspace_profile") as WorkspaceProfileId) || "production";
+  });
+  const activeProfile = getWorkspaceProfile(activeProfileId);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "available" | "rented" | "low-stock">("all");
@@ -263,6 +269,86 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
   const [quotePrefillClient, setQuotePrefillClient] = useState<ClientRecord | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState<boolean>(false);
   const [upgradeTargetTier, setUpgradeTargetTier] = useState<SubscriptionTier>("pro");
+
+  const handleChangeProfile = (profileId: WorkspaceProfileId) => {
+    const nextProfile = getWorkspaceProfile(profileId);
+    setActiveProfileId(profileId);
+    window.localStorage.setItem("kroma_workspace_profile", profileId);
+    if (!nextProfile.visibleTabs.includes(activeTab)) {
+      setActiveTab("dashboard");
+    }
+    showToast("success", `Univers actif : ${nextProfile.label}`);
+  };
+
+  const handleConvertQuoteToDossier = async (quote: ClientQuote): Promise<boolean> => {
+    if (quote.rentalStatus) {
+      setActiveTab("rentals");
+      return true;
+    }
+
+    const quantities = new Map<string, number>();
+    (quote.rentalItems || []).forEach((line) => {
+      if (!line.itemId || line.isSubRental) return;
+      quantities.set(line.itemId, (quantities.get(line.itemId) || 0) + Math.max(0, Number(line.quantity) || 0));
+    });
+
+    const reserved: Array<{ item: InventoryItem; quantity: number }> = [];
+    let missingTotal = 0;
+    for (const [itemId, quantity] of quantities) {
+      const item = items.find((candidate) => candidate.id === itemId);
+      if (!item) {
+        missingTotal += quantity;
+        continue;
+      }
+      const availableToReserve = Math.min(item.availableQuantity, quantity);
+      missingTotal += Math.max(0, quantity - item.availableQuantity);
+      if (availableToReserve === 0) continue;
+      const updated = await onUpdateItem(item.id, {
+        availableQuantity: Math.max(0, item.availableQuantity - availableToReserve),
+        reservedQuantity: (item.reservedQuantity || 0) + availableToReserve,
+      });
+      if (!updated) {
+        for (const previous of reserved) {
+          await onUpdateItem(previous.item.id, {
+            availableQuantity: previous.item.availableQuantity,
+            reservedQuantity: previous.item.reservedQuantity || 0,
+          });
+        }
+        showToast("error", "La réservation du parc n’a pas pu être finalisée.");
+        return false;
+      }
+      reserved.push({ item, quantity: availableToReserve });
+    }
+
+    const rentalItemsWithShortage = (quote.rentalItems || []).map((line) => {
+      const stockItem = items.find((candidate) => candidate.id === line.itemId);
+      const available = stockItem?.availableQuantity || 0;
+      return {
+        ...line,
+        shortageQuantity: line.isSubRental ? 0 : Math.max(0, line.quantity - available),
+      };
+    });
+    const converted = await onUpdateQuote(quote.id, {
+      status: quote.status === "draft" || quote.status === "sent" ? "accepted" : quote.status,
+      rentalStatus: "preparing",
+      rentalItems: rentalItemsWithShortage,
+    });
+    if (!converted) {
+      for (const previous of reserved) {
+        await onUpdateItem(previous.item.id, {
+          availableQuantity: previous.item.availableQuantity,
+          reservedQuantity: previous.item.reservedQuantity || 0,
+        });
+      }
+      showToast("error", "Le dossier n’a pas pu être créé.");
+      return false;
+    }
+    showToast("success", missingTotal > 0
+      ? `Dossier ${quote.quoteNumber} créé. ${missingTotal} article(s) à sous-louer.`
+      : `Dossier ${quote.quoteNumber} créé et matériel réservé.`);
+    setActiveTab("rentals");
+    return true;
+  };
 
   // Handler to open Plan Upgrade Modal
   const handleOpenUpgradeModal = (recommendedTier: SubscriptionTier = "pro") => {
@@ -770,8 +856,12 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
     showToast("success", "Téléchargement du fichier de sauvegarde JSON lancé.");
   };
 
+  const activeEvent = (quotes || []).find((quote) =>
+    quote.status === "accepted" || quote.rentalStatus === "in_rental" || quote.rentalStatus === "overdue"
+  ) || (quotes || [])[0];
+
   return (
-    <div id="desktop-dashboard" className="w-full flex flex-col space-y-5">
+    <div id="desktop-dashboard" className={`locasyst-theme profile-${activeProfile.id} w-full flex flex-col space-y-5`}>
       {/* Persistent Offline & Sync Status Banner */}
       <ConnectivityIndicator
         isOnline={isOnline}
@@ -991,8 +1081,78 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
         </div>
       </div>
 
+      {/* Primary rental ERP tabs: the workspace is organized by business flow. */}
+      <nav
+        aria-label="Navigation métier"
+        className="locasyst-primary-tabs flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+      >
+        {[
+          { id: "dashboard" as MainAppNavTab, label: "Accueil" },
+          { id: "quotes" as MainAppNavTab, label: "Affaires & Devis" },
+          { id: "rentals" as MainAppNavTab, label: "Locations" },
+          { id: "inventory" as MainAppNavTab, label: "Parc & Stock" },
+          { id: "calendar" as MainAppNavTab, label: "Planning" },
+          { id: "invoices" as MainAppNavTab, label: "Facturation" },
+          { id: "directory" as MainAppNavTab, label: "Clients & Lieux" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`whitespace-nowrap rounded-lg px-4 py-2 text-xs font-bold transition ${
+              activeTab === tab.id
+                ? "bg-[#3978a8] text-white shadow-sm"
+                : "text-slate-500 hover:bg-[#edf4f9] hover:text-[#19304d]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* Event Control Center header */}
+      <section className="event-control-header rounded-xl border border-[#c9dceb] bg-white shadow-sm">
+        <div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-[#3978a8]">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" /> {activeProfile.copy.activeEntity}
+            </div>
+            <h2 className="truncate text-xl font-black tracking-tight text-[#17243a]">
+              {activeEvent?.projectName || activeEvent?.clientName || "Aucun événement sélectionné"}
+            </h2>
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
+              <span>{activeEvent?.clientCompany || activeEvent?.clientName || "Créer un premier dossier"}</span>
+              <span>{activeEvent?.eventLocation || activeEvent?.shippingAddress || "Lieu à renseigner"}</span>
+              <span>{activeEvent?.startDate ? new Date(activeEvent.startDate).toLocaleDateString("fr-FR") : "Dates à définir"}</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setActiveTab("quotes")} className="rounded-lg border border-[#b9d0e1] bg-[#f4f8fb] px-3 py-2 text-xs font-bold text-[#3978a8] hover:bg-[#e8f1f7] transition">
+              Ouvrir le dossier
+            </button>
+            <button type="button" onClick={() => setActiveTab("calendar")} className="rounded-lg bg-[#3978a8] px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#2f668f] transition">
+              Voir le planning
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 border-t border-[#e2eaf1] sm:grid-cols-5">
+          {[
+            ["Devis", activeEvent ? "Validé" : "À créer", "text-[#3978a8]"],
+            ["Préparation", activeEvent ? "À organiser" : "—", "text-amber-600"],
+            ["Livraison", activeEvent ? "À planifier" : "—", "text-slate-500"],
+            ["Exploitation", activeEvent ? "À venir" : "—", "text-slate-500"],
+            ["Reprise", activeEvent ? "À prévoir" : "—", "text-slate-500"],
+          ].map(([label, value, color]) => (
+            <div key={label} className="border-r border-[#e2eaf1] px-4 py-2.5 last:border-r-0">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</div>
+              <div className={`mt-0.5 text-xs font-black ${color}`}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Top Metric KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div className="dashboard-kpis grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
         {/* KPI 1: Total Stock & References */}
         <div className="p-4 rounded-2xl bg-[#161a2b] border border-slate-700/60 hover:border-indigo-500/50 shadow-sm flex flex-col justify-between transition group">
           <div className="flex items-center justify-between">
@@ -1125,6 +1285,9 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
             onToggleSplitMode={onToggleSplitMode}
             darkMode={darkMode}
             onToggleDarkMode={onToggleDarkMode}
+            activeProfile={activeProfile}
+            onChangeProfile={handleChangeProfile}
+            visibleTabs={activeProfile.visibleTabs}
           />
         </div>
 
@@ -1136,7 +1299,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
           {activeTab === "dashboard" && (
             <div className="space-y-5">
               {/* Top Banner with Quick Actions */}
-              <div className="bg-gradient-to-r from-[#12162a] via-[#101527] to-[#0c0f1c] border border-indigo-500/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+              <div className="dashboard-hero bg-gradient-to-r from-[#12162a] via-[#101527] to-[#0c0f1c] border border-indigo-500/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1.5">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold">
@@ -1177,6 +1340,25 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                       Planning Régie
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Compact operational header: actions stay visible without a marketing hero. */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#3978a8]">{activeProfile.copy.dashboardEyebrow}</p>
+                  <h2 className="text-base font-black text-[#17243a]">{activeProfile.copy.dashboardTitle}</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => setActiveTab("quotes")} className="rounded-lg bg-[#d49a45] px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#bd8432] transition">
+                    <Plus className="mr-1 inline-block h-3.5 w-3.5" /> Nouveau devis
+                  </button>
+                  <button type="button" onClick={() => setShowDepartureModal(true)} className="rounded-lg bg-[#3978a8] px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#2f668f] transition">
+                    <ArrowUpRight className="mr-1 inline-block h-3.5 w-3.5" /> Départ matériel
+                  </button>
+                  <button type="button" onClick={() => setActiveTab("calendar")} className="rounded-lg border border-[#b7cde0] bg-[#f4f8fb] px-3 py-2 text-xs font-bold text-[#3978a8] hover:bg-[#e8f1f7] transition">
+                    Planning
+                  </button>
                 </div>
               </div>
 
@@ -1717,6 +1899,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
       {/* ========================================================= */}
       {activeTab === "quotes" && (
         <QuotesDashboard
+          activeProfile={activeProfile}
           quotes={safeQuotes}
           inventory={safeItems}
           studios={safeStudios}
@@ -1727,6 +1910,8 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
           onAddQuote={onAddQuote}
           onUpdateQuote={onUpdateQuote}
           onDeleteQuote={onDeleteQuote}
+          onOpenDossiers={() => setActiveTab("rentals")}
+          onConvertToDossier={handleConvertQuoteToDossier}
           onRefresh={onRefresh}
           prefillTech={quotePrefillTech}
           prefillStudio={quotePrefillStudio}

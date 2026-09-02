@@ -42,4 +42,1226 @@
   animation: pulseGlow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/*
+ * KROMA ERP workspace
+ *
+ * The operational workspace intentionally uses a light, compact ERP surface.
+ * Modals and status accents keep their existing dark/semantic treatment, while
+ * the main work area becomes easier to read during long production days.
+ */
+#desktop-dashboard.locasyst-theme {
+  color: #263244;
+  background: #f3f5f7;
+  border-top: 1px solid #d6dde6;
+  padding: 14px 18px 24px;
+}
 
+#desktop-dashboard.locasyst-theme .locasyst-sidebar {
+  background: #14243b !important;
+  border-color: #243b5a !important;
+  box-shadow: 0 12px 32px rgba(30, 41, 59, 0.08);
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-white {
+  color: #ffffff !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-300,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-400 {
+  color: #aebbd0 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar [class~="bg-[#1c2237]"] {
+  background-color: #eef2f7 !important;
+  border-color: #d6dee9 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar button:not([class*="bg-indigo-600"]):not([class*="bg-amber-500"]) {
+  color: #c4d0e1;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar button:not([class*="bg-indigo-600"]):not([class*="bg-amber-500"]):hover {
+  background-color: #203653 !important;
+  color: #ffffff !important;
+}
+
+/* Cohesive audiovisual palette for the operational workspace. */
+#desktop-dashboard.locasyst-theme .bg-\[\#07080e\],
+#desktop-dashboard.locasyst-theme .bg-\[\#080a10\],
+#desktop-dashboard.locasyst-theme .bg-\[\#0e111d\],
+#desktop-dashboard.locasyst-theme .bg-\[\#121524\],
+#desktop-dashboard.locasyst-theme .bg-\[\#121627\],
+#desktop-dashboard.locasyst-theme .bg-\[\#111422\],
+#desktop-dashboard.locasyst-theme .bg-\[\#121526\],
+#desktop-dashboard.locasyst-theme .bg-\[\#121626\],
+#desktop-dashboard.locasyst-theme .bg-\[\#161b2e\],
+#desktop-dashboard.locasyst-theme .bg-\[\#1c2237\],
+#desktop-dashboard.locasyst-theme .bg-\[\#1c223c\],
+#desktop-dashboard.locasyst-theme .bg-\[\#1f253d\],
+#desktop-dashboard.locasyst-theme .bg-\[\#202742\],
+#desktop-dashboard.locasyst-theme .bg-\[\#242c48\] {
+  background-color: #ffffff !important;
+}
+
+.locasyst-app-shell .bg-\[\#121626\],
+.locasyst-app-shell .bg-\[\#07080e\] {
+  background-color: #eef2f6 !important;
+}
+
+.locasyst-app-shell header .bg-\[\#1c2237\],
+.locasyst-app-shell header .bg-\[\#242c48\] {
+  background-color: #f4f7fa !important;
+  border-color: #d6e0ea !important;
+}
+
+.locasyst-app-shell header .text-slate-300,
+.locasyst-app-shell header .text-slate-400 {
+  color: #5d6e84 !important;
+}
+
+#desktop-dashboard.locasyst-theme .bg-\[\#141829\],
+#desktop-dashboard.locasyst-theme .bg-\[\#161a2b\] {
+  background-color: #f8fafc !important;
+}
+
+#desktop-dashboard.locasyst-theme [class*="bg-gradient-to-r"] {
+  background-image: linear-gradient(110deg, #14243b, #1d3557) !important;
+}
+
+#desktop-dashboard.locasyst-theme .text-white {
+  color: #17243a !important;
+}
+
+#desktop-dashboard.locasyst-theme button.text-white,
+#desktop-dashboard.locasyst-theme button .text-white,
+#desktop-dashboard.locasyst-theme [class*="bg-indigo-600"].text-white,
+#desktop-dashboard.locasyst-theme [class*="bg-amber-500"].text-white {
+  color: #ffffff !important;
+}
+
+#desktop-dashboard.locasyst-theme .border-slate-700\/60,
+#desktop-dashboard.locasyst-theme .border-slate-700\/70,
+#desktop-dashboard.locasyst-theme .border-\[\#1e233b\],
+#desktop-dashboard.locasyst-theme .border-\[\#1f243b\],
+#desktop-dashboard.locasyst-theme .border-\[\#20253c\],
+#desktop-dashboard.locasyst-theme .border-\[\#262d48\] {
+  border-color: #d6dde6 !important;
+}
+
+#desktop-dashboard.locasyst-theme input,
+#desktop-dashboard.locasyst-theme select,
+#desktop-dashboard.locasyst-theme textarea {
+  color: #17243a;
+  background-color: #ffffff;
+  border-color: #c4cfdd;
+}
+
+#desktop-dashboard.locasyst-theme table thead {
+  background-color: #e8edf3 !important;
+  color: #31445e !important;
+}
+
+#desktop-dashboard.locasyst-theme table tbody tr {
+  border-color: #e1e7ee !important;
+}
+
+#desktop-dashboard.locasyst-theme table tbody tr:hover {
+  background-color: #f6f8fa !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-kpis {
+  display: none;
+}
+
+#desktop-dashboard.locasyst-theme .event-control-header {
+  box-shadow: 0 8px 24px rgba(38, 74, 104, 0.06);
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero {
+  display: none;
+}
+
+/* Light audiovisual variant: airy workspace with restrained copper accents. */
+#desktop-dashboard.locasyst-theme .locasyst-sidebar {
+  background: #f8fafc !important;
+  border-color: #d6e0eb !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-white {
+  color: #17243a !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-300,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-400 {
+  color: #607089 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar button:not([class*="bg-indigo-600"]):not([class*="bg-amber-500"]):hover {
+  background-color: #e8f0f7 !important;
+  color: #19304d !important;
+}
+
+#desktop-dashboard.locasyst-theme .bg-indigo-600 {
+  background-color: #3978a8 !important;
+}
+
+#desktop-dashboard.locasyst-theme .bg-amber-500 {
+  background-color: #d49a45 !important;
+}
+
+#desktop-dashboard.locasyst-theme [class*="bg-gradient-to-r"] {
+  background-image: linear-gradient(110deg, #ffffff, #edf4f9) !important;
+}
+
+/* Commercial workspace: dense, calm and operational rather than a marketing dashboard. */
+#desktop-dashboard.locasyst-theme .locasyst-quotes-screen {
+  color: #17243a;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 4px 2px 8px;
+}
+
+#desktop-dashboard.locasyst-theme .screen-eyebrow {
+  color: #3978a8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-screen-header h1 {
+  margin: 3px 0 2px;
+  color: #17243a;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-screen-header p {
+  margin: 0;
+  color: #718198;
+  font-size: 12px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-header-actions button {
+  min-height: 38px;
+  border-radius: 7px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 750;
+  transition: .15s ease;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-header-actions .primary-action {
+  background: #3978a8 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(57,120,168,.2);
+}
+
+#desktop-dashboard.locasyst-theme .quotes-header-actions .secondary-action {
+  background: #fff !important;
+  border: 1px solid #cbd7e3;
+  color: #49637e !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-summary-strip > div {
+  min-height: 82px;
+  padding: 14px 16px !important;
+  border: 1px solid #d6e0eb !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  box-shadow: 0 2px 7px rgba(30,55,80,.04) !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-summary-strip span {
+  color: #8191a6 !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-summary-strip p {
+  color: #20334b !important;
+  font-size: 19px !important;
+  margin-top: 5px !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 58px;
+  padding: 9px 12px;
+  border: 1px solid #d1dce7;
+  border-radius: 8px;
+  background: #fff;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-toolbar input {
+  height: 36px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-toolbar button {
+  border-radius: 5px;
+  border-color: #cbd7e3 !important;
+  background: #f5f8fb !important;
+  color: #536982 !important;
+  box-shadow: none !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-toolbar button[class*="bg-indigo-600"] {
+  background: #3978a8 !important;
+  color: #fff !important;
+  border-color: #3978a8 !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-list-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 2px 0;
+  color: #20334b;
+  font-size: 13px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-list-heading div {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-list-heading span {
+  color: #8797aa;
+  font-size: 11px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-table-shell {
+  overflow: hidden;
+  border: 1px solid #cfdbe7;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(30,55,80,.05);
+}
+
+#desktop-dashboard.locasyst-theme .quotes-table-shell table {
+  min-width: 1040px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-table-shell table thead th {
+  padding: 12px 12px;
+  color: #62758c !important;
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-table-shell table tbody td {
+  padding: 12px;
+  color: #51657d !important;
+  border-color: #e2e8ef !important;
+  vertical-align: middle;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-table-shell table tbody td .text-white,
+#desktop-dashboard.locasyst-theme .quotes-table-shell table tbody td .text-slate-100,
+#desktop-dashboard.locasyst-theme .quotes-table-shell table tbody td .text-slate-200 {
+  color: #20334b !important;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-table-shell table tbody tr:hover {
+  background: #f4f8fb !important;
+}
+
+@media (max-width: 900px) {
+  #desktop-dashboard.locasyst-theme .quotes-screen-header,
+  #desktop-dashboard.locasyst-theme .quotes-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  #desktop-dashboard.locasyst-theme .quotes-header-actions { justify-content: flex-end; }
+  #desktop-dashboard.locasyst-theme .quotes-summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+#desktop-dashboard.locasyst-theme .quotes-summary-strip {
+  display: none;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, .85fr);
+  gap: 12px;
+  align-items: start;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-workspace .quotes-table-shell {
+  min-width: 0;
+  border-radius: 8px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-workspace .quotes-table-shell .overflow-x-auto {
+  overflow-x: auto;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-workspace table {
+  min-width: 780px;
+}
+
+#desktop-dashboard.locasyst-theme .quotes-workspace table th:nth-child(4),
+#desktop-dashboard.locasyst-theme .quotes-workspace table td:nth-child(4),
+#desktop-dashboard.locasyst-theme .quotes-workspace table th:nth-child(6),
+#desktop-dashboard.locasyst-theme .quotes-workspace table td:nth-child(6) {
+  display: none;
+}
+
+#desktop-dashboard.locasyst-theme .quote-row {
+  cursor: pointer;
+}
+
+#desktop-dashboard.locasyst-theme .quote-row-selected {
+  background: #edf5fa !important;
+  box-shadow: inset 3px 0 0 #3978a8;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-panel {
+  min-height: 430px;
+  padding: 18px;
+  border: 1px solid #cbd8e4;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(30,55,80,.05);
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5ebf1;
+  color: #8091a5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-topline .px-2\.5 {
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #e9f5ef !important;
+  border-color: #b9e0cb !important;
+  color: #267d51 !important;
+  letter-spacing: 0;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-title {
+  display: flex;
+  gap: 11px;
+  padding: 18px 0;
+}
+
+#desktop-dashboard.locasyst-theme .quote-document-icon {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  background: #e7f0f6;
+  color: #3978a8;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-title h2 {
+  margin: 0;
+  color: #1b2d43;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-title p,
+#desktop-dashboard.locasyst-theme .quote-detail-section p {
+  margin: 4px 0 0;
+  color: #8797a9;
+  font-size: 11px;
+}
+
+#desktop-dashboard.locasyst-theme .quote-phase-rail {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 10px 0 18px;
+  border-bottom: 1px solid #e5ebf1;
+}
+
+#desktop-dashboard.locasyst-theme .quote-phase {
+  color: #a0adbb;
+  font-size: 10px;
+  text-align: center;
+}
+
+#desktop-dashboard.locasyst-theme .quote-phase span {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  margin: 0 auto 5px;
+  place-items: center;
+  border: 1px solid #d3dce5;
+  border-radius: 50%;
+  background: #f7f9fb;
+  font-weight: 800;
+}
+
+#desktop-dashboard.locasyst-theme .quote-phase strong { font-weight: 700; }
+#desktop-dashboard.locasyst-theme .quote-phase.current,
+#desktop-dashboard.locasyst-theme .quote-phase.complete { color: #3978a8; }
+#desktop-dashboard.locasyst-theme .quote-phase.current span,
+#desktop-dashboard.locasyst-theme .quote-phase.complete span { border-color: #3978a8; background: #eaf2f7; color: #3978a8; }
+
+#desktop-dashboard.locasyst-theme .quote-detail-section {
+  padding: 15px 0;
+  border-bottom: 1px solid #e5ebf1;
+}
+
+#desktop-dashboard.locasyst-theme .detail-label,
+#desktop-dashboard.locasyst-theme .quote-detail-grid span {
+  display: block;
+  margin-bottom: 6px;
+  color: #8191a4;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-section strong,
+#desktop-dashboard.locasyst-theme .quote-detail-grid strong {
+  color: #24374e;
+  font-size: 12px;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 10px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5ebf1;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-grid small {
+  display: block;
+  margin-top: 3px;
+  color: #8797a9;
+  font-size: 10px;
+}
+
+#desktop-dashboard.locasyst-theme .quote-detail-grid .detail-total { color: #218158; }
+#desktop-dashboard.locasyst-theme .quote-detail-actions { display: grid; gap: 7px; border-bottom: 0; }
+#desktop-dashboard.locasyst-theme .quote-detail-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  border: 1px solid #d1dce7;
+  border-radius: 5px;
+  background: #f8fafc;
+  color: #536a82;
+  font-size: 11px;
+  font-weight: 750;
+}
+#desktop-dashboard.locasyst-theme .quote-detail-actions .detail-primary { background: #3978a8; border-color: #3978a8; color: #fff; }
+#desktop-dashboard.locasyst-theme .quote-empty-detail { display: grid; min-height: 390px; place-content: center; justify-items: center; gap: 9px; color: #9aa8b7; text-align: center; }
+#desktop-dashboard.locasyst-theme .quote-empty-detail strong { color: #536a82; font-size: 13px; }
+#desktop-dashboard.locasyst-theme .quote-empty-detail p { max-width: 190px; margin: 0; font-size: 11px; }
+
+@media (max-width: 1100px) {
+  #desktop-dashboard.locasyst-theme .quotes-workspace { grid-template-columns: 1fr; }
+  #desktop-dashboard.locasyst-theme .quote-detail-panel { min-height: 0; }
+}
+
+/* Quote builder: a clean production form, not a dark AI wizard. */
+#modal-quote-builder.quote-builder-backdrop {
+  align-items: stretch !important;
+  padding: 0 !important;
+  background: #eef2f5 !important;
+  backdrop-filter: none !important;
+}
+
+#modal-quote-builder .quote-builder-modal {
+  width: 100% !important;
+  max-width: none;
+  max-height: none;
+  height: 100vh;
+  border: 1px solid #cbd7e3 !important;
+  border-radius: 0 !important;
+  background: #f4f7fa !important;
+  box-shadow: 0 24px 70px rgba(17, 39, 61, .28) !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:first-child {
+  padding: 12px 20px !important;
+  background: #fff !important;
+  border-color: #dce5ed !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:first-child h2,
+#modal-quote-builder .quote-builder-modal > div:first-child .text-white {
+  color: #1d3047 !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:first-child p,
+#modal-quote-builder .quote-builder-modal > div:first-child .text-slate-400 {
+  color: #7a8da1 !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:nth-child(2) {
+  padding: 0 20px !important;
+  min-height: 52px;
+  background: #fff !important;
+  border-color: #d7e1e9 !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:nth-child(2) button {
+  min-height: 52px;
+  padding: 0 15px !important;
+  border: 1px solid #d1dce6 !important;
+  border-width: 0 0 3px 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #60758b !important;
+  box-shadow: none !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:nth-child(2) button.bg-indigo-600 {
+  background: #f5f8fa !important;
+  border-color: #3978a8 !important;
+  color: #214766 !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:nth-child(2) button.bg-indigo-600 span {
+  background: #3978a8 !important;
+  color: #3978a8 !important;
+  color: #fff !important;
+}
+
+#modal-quote-builder .quote-builder-modal > div:nth-child(2) > div:last-child {
+  padding: 7px 11px !important;
+  border: 1px solid #d2dde7 !important;
+  border-radius: 5px !important;
+  background: #fff !important;
+}
+
+#modal-quote-builder form {
+  padding: 16px 20px !important;
+  background: #eef2f5 !important;
+  color: #24374d !important;
+}
+
+#modal-quote-builder form > div {
+  gap: 14px !important;
+}
+
+#modal-quote-builder form [class*="bg-[#"] {
+  background: #fff !important;
+  border-color: #d1dce6 !important;
+  box-shadow: 0 2px 6px rgba(30, 55, 80, .035);
+  border-radius: 6px !important;
+}
+
+#modal-quote-builder form [class*="bg-[#0a0d17"],
+#modal-quote-builder form [class*="bg-[#0d101c"],
+#modal-quote-builder form [class*="bg-[#0d101d"],
+#modal-quote-builder form [class*="bg-[#0f1222"],
+#modal-quote-builder form [class*="bg-[#101424"] {
+  background: #f1f5f8 !important;
+}
+
+#modal-quote-builder form [class*="text-white"],
+#modal-quote-builder form [class*="text-slate-100"],
+#modal-quote-builder form [class*="text-slate-200"] {
+  color: #263a51 !important;
+}
+
+#modal-quote-builder form [class*="text-slate-300"],
+#modal-quote-builder form [class*="text-slate-400"] {
+  color: #71849a !important;
+}
+
+#modal-quote-builder form input,
+#modal-quote-builder form select,
+#modal-quote-builder form textarea {
+  color: #263a51 !important;
+  background: #fff !important;
+  border-color: #c8d5e1 !important;
+  border-radius: 6px !important;
+}
+
+#modal-quote-builder form h3,
+#modal-quote-builder form h4 {
+  color: #3978a8 !important;
+}
+
+#modal-quote-builder form label {
+  color: #6e8297 !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+}
+
+#modal-quote-builder form [class*="rounded-2xl"],
+#modal-quote-builder form [class*="rounded-3xl"] {
+  border-radius: 6px !important;
+}
+
+#modal-quote-builder form [class*="bg-indigo-600"] {
+  background: #3978a8 !important;
+  border-color: #3978a8 !important;
+  color: #fff !important;
+}
+
+#modal-quote-builder form [class*="bg-emerald-950"],
+#modal-quote-builder form [class*="bg-emerald-600"] {
+  background: #eaf6f0 !important;
+  border-color: #b9dfca !important;
+  color: #287b51 !important;
+}
+
+#modal-quote-builder form [class*="bg-amber-950"] {
+  background: #fff7e8 !important;
+  border-color: #ecd49f !important;
+}
+
+#modal-quote-builder form button:not([class*="bg-indigo-600"]):not([class*="bg-emerald-600"]) {
+  color: #5c7188;
+}
+
+#modal-quote-builder form > div:last-child {
+  position: sticky;
+  bottom: -20px;
+  z-index: 3;
+  margin: 10px -22px -20px !important;
+  padding: 12px 22px !important;
+  border-top: 1px solid #d7e1e9;
+  background: rgba(244, 247, 250, .96) !important;
+}
+
+/* Profile identities: same application shell, different professional language. */
+#desktop-dashboard.profile-production { --profile-accent: #3978a8; --profile-accent-dark: #2f668f; --profile-soft: #eaf3f8; }
+#desktop-dashboard.profile-cinema { --profile-accent: #a34f6b; --profile-accent-dark: #823c54; --profile-soft: #faeef2; }
+#desktop-dashboard.profile-wedding { --profile-accent: #b1844d; --profile-accent-dark: #8f6638; --profile-soft: #fbf4e9; }
+
+#desktop-dashboard.profile-production .bg-\[\#3978a8\],
+#desktop-dashboard.profile-cinema .bg-\[\#3978a8\],
+#desktop-dashboard.profile-wedding .bg-\[\#3978a8\],
+#desktop-dashboard.profile-production .bg-indigo-600,
+#desktop-dashboard.profile-cinema .bg-indigo-600,
+#desktop-dashboard.profile-wedding .bg-indigo-600 { background-color: var(--profile-accent) !important; }
+
+#desktop-dashboard.profile-production .text-\[\#3978a8\],
+#desktop-dashboard.profile-cinema .text-\[\#3978a8\],
+#desktop-dashboard.profile-wedding .text-\[\#3978a8\],
+#desktop-dashboard.profile-production .text-indigo-400,
+#desktop-dashboard.profile-cinema .text-indigo-400,
+#desktop-dashboard.profile-wedding .text-indigo-400 { color: var(--profile-accent) !important; }
+
+#desktop-dashboard.profile-production .border-\[\#b9d0e1\],
+#desktop-dashboard.profile-cinema .border-\[\#b9d0e1\],
+#desktop-dashboard.profile-wedding .border-\[\#b9d0e1\] { border-color: color-mix(in srgb, var(--profile-accent) 45%, white) !important; }
+
+#desktop-dashboard.profile-production .event-control-header,
+#desktop-dashboard.profile-cinema .event-control-header,
+#desktop-dashboard.profile-wedding .event-control-header { border-top: 3px solid var(--profile-accent); }
+
+#desktop-dashboard.profile-cinema .locasyst-sidebar .bg-indigo-600,
+#desktop-dashboard.profile-wedding .locasyst-sidebar .bg-indigo-600 { background-color: var(--profile-accent) !important; }
+
+#desktop-dashboard.profile-cinema .locasyst-sidebar .text-indigo-400,
+#desktop-dashboard.profile-wedding .locasyst-sidebar .text-indigo-400 { color: var(--profile-accent) !important; }
+
+#desktop-dashboard.profile-cinema .locasyst-quotes-screen .screen-eyebrow,
+#desktop-dashboard.profile-wedding .locasyst-quotes-screen .screen-eyebrow { color: var(--profile-accent) !important; }
+
+/* Final readability pass for the light workspace. */
+#desktop-dashboard.locasyst-theme .text-slate-300 { color: #536980 !important; }
+#desktop-dashboard.locasyst-theme .text-slate-400 { color: #71849a !important; }
+#desktop-dashboard.locasyst-theme .text-slate-500 { color: #8091a4 !important; }
+#desktop-dashboard.locasyst-theme .text-slate-600 { color: #63778d !important; }
+#desktop-dashboard.locasyst-theme .text-slate-200 { color: #2b4058 !important; }
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-300 { color: #c4d0e1 !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-400 { color: #aebbd0 !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .text-slate-500 { color: #91a3b9 !important; }
+
+#desktop-dashboard.locasyst-theme .event-control-header .text-slate-500,
+#desktop-dashboard.locasyst-theme .event-control-header .text-slate-400 { color: #657a90 !important; }
+
+#desktop-dashboard.locasyst-theme .quick-operational-grid .text-slate-400,
+#desktop-dashboard.locasyst-theme .quick-operational-grid .text-slate-500 { color: #71849a !important; }
+
+/* -------------------------------------------------------------------------
+ * KROMA premium UI system
+ * Final consistency layer for legacy modules and the new Locasyst workspace.
+ * Keep the visual language quiet: crisp surfaces, one accent, clear density.
+ * ------------------------------------------------------------------------- */
+:root {
+  --kroma-ink: #17243a;
+  --kroma-muted: #718198;
+  --kroma-line: #dce5ed;
+  --kroma-surface: #ffffff;
+  --kroma-canvas: #eef2f6;
+  --kroma-accent: #3978a8;
+  --kroma-accent-dark: #2f668f;
+  --kroma-radius: 14px;
+  --kroma-shadow: 0 8px 24px rgba(25, 53, 79, .055);
+}
+
+body {
+  background: var(--kroma-canvas);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(57, 120, 168, .2);
+  outline-offset: 1px;
+}
+
+.locasyst-app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 96% 0%, rgba(211, 229, 241, .46), transparent 25rem),
+    var(--kroma-canvas) !important;
+}
+
+.locasyst-app-shell > header {
+  min-height: 64px;
+  box-shadow: 0 1px 0 rgba(25, 53, 79, .04), 0 8px 24px rgba(25, 53, 79, .035) !important;
+}
+
+.locasyst-app-shell > header button {
+  border-radius: 10px;
+}
+
+.locasyst-app-shell > main {
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+#desktop-dashboard.locasyst-theme {
+  border: 0;
+  padding: 8px 10px 30px;
+  background: transparent;
+  --kroma-accent: var(--profile-accent, #3978a8);
+  --kroma-accent-dark: var(--profile-accent-dark, #2f668f);
+}
+
+#desktop-dashboard.locasyst-theme > .flex.flex-col.sm\:flex-row,
+#desktop-dashboard.locasyst-theme .locasyst-primary-tabs,
+#desktop-dashboard.locasyst-theme .event-control-header,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar,
+#desktop-dashboard.locasyst-theme .quotes-table-shell,
+#desktop-dashboard.locasyst-theme .quote-detail-panel,
+#desktop-dashboard.locasyst-theme .quick-operational-grid > *,
+#desktop-dashboard.locasyst-theme .dashboard-panel {
+  border-radius: var(--kroma-radius) !important;
+  box-shadow: var(--kroma-shadow) !important;
+}
+
+#desktop-dashboard.locasyst-theme > .flex.flex-col.sm\:flex-row {
+  padding: 10px !important;
+  border: 1px solid var(--kroma-line) !important;
+  background: rgba(255, 255, 255, .86) !important;
+  backdrop-filter: blur(12px);
+}
+
+#desktop-dashboard.locasyst-theme #global-spotlight-btn {
+  min-height: 40px;
+  background: #f5f8fb !important;
+  border-color: #d5e0e9 !important;
+  color: #60758b !important;
+}
+
+#desktop-dashboard.locasyst-theme #global-spotlight-btn:hover {
+  background: #fff !important;
+  border-color: color-mix(in srgb, var(--kroma-accent) 50%, white) !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-primary-tabs {
+  position: sticky;
+  top: 72px;
+  z-index: 15;
+  padding: 4px !important;
+  border-color: var(--kroma-line) !important;
+  background: rgba(255, 255, 255, .9) !important;
+  backdrop-filter: blur(14px);
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-primary-tabs button {
+  min-height: 36px;
+  border-radius: 9px;
+  color: #687b90;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-primary-tabs button:hover {
+  color: var(--kroma-ink);
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-primary-tabs button.bg-\[\#3978a8\] {
+  background: var(--kroma-accent) !important;
+}
+
+#desktop-dashboard.locasyst-theme .event-control-header {
+  overflow: hidden;
+  border-color: #d2e0ea !important;
+  border-top-width: 3px;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar {
+  top: 88px;
+  padding: 12px !important;
+  border-color: #d5e0e9 !important;
+  background: rgba(255, 255, 255, .92) !important;
+  box-shadow: 0 12px 30px rgba(25, 53, 79, .07) !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .border-b,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .border-t {
+  border-color: #e3eaf0 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .bg-\[\#1c2237\],
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .bg-\[\#0e111d\] {
+  background: #f5f8fb !important;
+  border-color: #d9e3eb !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar select {
+  color: var(--kroma-ink) !important;
+  background: #fff !important;
+  border-color: #cbd9e4 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar option {
+  color: var(--kroma-ink);
+  background: #fff;
+}
+
+#desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-displays,
+#desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-flightcases,
+#desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-maintenance,
+#desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-studios,
+#desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-technicians,
+#desktop-dashboard.locasyst-theme .sidebar-advanced-closed #nav-tab-logs {
+  display: none;
+}
+
+#desktop-dashboard.locasyst-theme .sidebar-advanced-toggle {
+  min-height: 22px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+}
+
+/* Make legacy screens readable on the light operational canvas. */
+#desktop-dashboard.locasyst-theme .bg-\[\#0d101c\],
+#desktop-dashboard.locasyst-theme .bg-\[\#0e111d\],
+#desktop-dashboard.locasyst-theme .bg-\[\#121626\],
+#desktop-dashboard.locasyst-theme .bg-\[\#131728\],
+#desktop-dashboard.locasyst-theme .bg-\[\#14182b\],
+#desktop-dashboard.locasyst-theme .bg-\[\#161a2b\],
+#desktop-dashboard.locasyst-theme .bg-\[\#171c30\],
+#desktop-dashboard.locasyst-theme .bg-\[\#181d33\] {
+  background-color: #fff !important;
+  border-color: #d9e3eb !important;
+}
+
+#desktop-dashboard.locasyst-theme .border-\[\#1e233b\],
+#desktop-dashboard.locasyst-theme .border-\[\#202742\],
+#desktop-dashboard.locasyst-theme .border-\[\#232945\],
+#desktop-dashboard.locasyst-theme .border-\[\#242b4a\],
+#desktop-dashboard.locasyst-theme .border-\[\#262e52\] {
+  border-color: #d9e3eb !important;
+}
+
+#desktop-dashboard.locasyst-theme .text-white { color: #20334b !important; }
+#desktop-dashboard.locasyst-theme .text-slate-100,
+#desktop-dashboard.locasyst-theme .text-slate-200 { color: #2b4058 !important; }
+#desktop-dashboard.locasyst-theme .text-slate-300 { color: #536980 !important; }
+#desktop-dashboard.locasyst-theme .text-slate-400 { color: #71849a !important; }
+
+#desktop-dashboard.locasyst-theme button[class*="bg-indigo-600"],
+#desktop-dashboard.locasyst-theme button[class*="bg-emerald-600"],
+#desktop-dashboard.locasyst-theme button[class*="bg-rose-600"] {
+  color: #fff !important;
+}
+
+#desktop-dashboard.locasyst-theme table thead th {
+  color: #536980 !important;
+  font-weight: 800;
+}
+
+#desktop-dashboard.locasyst-theme table tbody td {
+  color: #425a72 !important;
+}
+
+#desktop-dashboard.locasyst-theme h1,
+#desktop-dashboard.locasyst-theme h2,
+#desktop-dashboard.locasyst-theme h3,
+#desktop-dashboard.locasyst-theme h4 {
+  color: #1b2d43;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero {
+  border-radius: var(--kroma-radius) !important;
+  border-color: #d4e0e9 !important;
+  box-shadow: var(--kroma-shadow) !important;
+}
+
+#desktop-dashboard.locasyst-theme .quick-operational-grid > * {
+  border-color: #d6e1ea !important;
+  background: rgba(255, 255, 255, .9) !important;
+}
+
+#desktop-dashboard.locasyst-theme table tbody tr {
+  transition: background-color .16s ease, box-shadow .16s ease;
+}
+
+#desktop-dashboard.locasyst-theme table tbody tr:hover {
+  box-shadow: inset 3px 0 0 var(--kroma-accent);
+}
+
+#desktop-dashboard.locasyst-theme .primary-action,
+#desktop-dashboard.locasyst-theme button[class*="bg-indigo-600"] {
+  background: var(--kroma-accent) !important;
+  border-color: var(--kroma-accent) !important;
+}
+
+#desktop-dashboard.locasyst-theme .primary-action:hover,
+#desktop-dashboard.locasyst-theme button[class*="bg-indigo-600"]:hover {
+  background: var(--kroma-accent-dark) !important;
+}
+
+#desktop-dashboard.locasyst-theme input,
+#desktop-dashboard.locasyst-theme select,
+#desktop-dashboard.locasyst-theme textarea {
+  min-height: 38px;
+  border-radius: 9px !important;
+}
+
+@media (max-width: 1023px) {
+  #desktop-dashboard.locasyst-theme .locasyst-primary-tabs {
+    top: 66px;
+  }
+
+  #desktop-dashboard.locasyst-theme .locasyst-sidebar {
+    position: static;
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .locasyst-app-shell > header {
+    min-height: 58px;
+  }
+
+  #desktop-dashboard.locasyst-theme {
+    padding: 4px 0 20px;
+  }
+
+  #desktop-dashboard.locasyst-theme .locasyst-primary-tabs {
+    top: 60px;
+    margin-inline: -2px;
+    border-radius: 10px !important;
+  }
+
+  #desktop-dashboard.locasyst-theme .event-control-header {
+    border-radius: 11px !important;
+  }
+
+  #desktop-dashboard.locasyst-theme .quotes-header-actions {
+    width: 100%;
+  }
+
+  #desktop-dashboard.locasyst-theme .quotes-header-actions button {
+    flex: 1;
+  }
+}
+
+/* Planning screen: same calm, readable Locasyst treatment as the commercial flow. */
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen {
+  color: var(--kroma-ink);
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > div:not(.fixed) {
+  border-color: #d7e2eb !important;
+  border-radius: var(--kroma-radius) !important;
+  box-shadow: var(--kroma-shadow) !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > div:not(.fixed),
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#0e111e"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#0e111d"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#0d101c"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#0d1020"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#121628"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#141829"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#14182e"] {
+  background: #fff !important;
+  border-color: #d7e2eb !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > div:first-of-type {
+  padding: 18px !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen h2,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen h3,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen h4,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .text-white {
+  color: #1b2d43 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .text-slate-200,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .text-slate-300 {
+  color: #536980 !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .text-slate-400 {
+  color: #71849a !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen select,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen input {
+  color: #263a51 !important;
+  background: #f7fafc !important;
+  border-color: #cad8e3 !important;
+  border-radius: 9px !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="bg-[#141829"] {
+  background: #f5f8fb !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="hover:bg-slate-800"]:hover,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen [class*="hover:bg-[#202642"]:hover {
+  background: #edf4f8 !important;
+  color: var(--kroma-ink) !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen table,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .grid {
+  border-color: #dfe7ee !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .border-slate-800,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .border-slate-800\/80,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .border-slate-800\/60 {
+  border-color: #dfe7ee !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .bg-indigo-600 {
+  background: var(--kroma-accent) !important;
+}
+
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .text-indigo-400,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen .text-indigo-300 {
+  color: var(--kroma-accent) !important;
+}
+
+@media (max-width: 640px) {
+  #desktop-dashboard.locasyst-theme .locasyst-calendar-screen > div:not(.fixed) {
+    border-radius: 11px !important;
+  }
+}
+
+/* Authentication is part of the product experience, not a separate skin. */
+.login-page-shell {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(57, 120, 168, .2), transparent 25rem),
+    radial-gradient(circle at 88% 88%, rgba(162, 79, 107, .12), transparent 24rem),
+    #f2f5f8 !important;
+  color: var(--kroma-ink) !important;
+}
+
+.login-page-shell > header {
+  border-color: #dce5ed !important;
+  background: rgba(255, 255, 255, .86) !important;
+  box-shadow: 0 1px 0 rgba(25, 53, 79, .04), 0 8px 24px rgba(25, 53, 79, .035);
+}
+
+.login-page-shell > header .text-white,
+.login-page-shell > main .text-white,
+.login-page-shell > main .text-slate-100,
+.login-page-shell > main .text-slate-200 {
+  color: var(--kroma-ink) !important;
+}
+
+.login-page-shell > header .text-slate-400,
+.login-page-shell > main .text-slate-300,
+.login-page-shell > main .text-slate-400 {
+  color: #718198 !important;
+}
+
+.login-page-shell > main > div > div {
+  border-color: #d9e3eb !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, .88) !important;
+  box-shadow: 0 18px 55px rgba(25, 53, 79, .09) !important;
+  backdrop-filter: blur(18px);
+}
+
+.login-page-shell input,
+.login-page-shell select {
+  color: var(--kroma-ink) !important;
+  background: #f7fafc !important;
+  border-color: #cbd9e4 !important;
+  border-radius: 10px !important;
+}
+
+.login-page-shell input::placeholder {
+  color: #9aaabc !important;
+}
+
+.login-page-shell button.bg-gradient-to-r,
+.login-page-shell button.bg-indigo-600 {
+  background: var(--kroma-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(57, 120, 168, .2) !important;
+}
+
+.login-page-shell button.bg-gradient-to-r:hover,
+.login-page-shell button.bg-indigo-600:hover {
+  background: var(--kroma-accent-dark) !important;
+}
+
+@media (max-width: 640px) {
+  .login-page-shell > main {
+    padding: 16px !important;
+  }
+}

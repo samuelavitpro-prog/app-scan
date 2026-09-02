@@ -1530,7 +1530,7 @@ export default function App() {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-      <div className="min-h-screen bg-[#07080e] text-[#e2e8f0] font-sans transition-colors selection:bg-indigo-500/30 selection:text-indigo-200">
+      <div className="locasyst-app-shell min-h-screen bg-[#eef2f6] text-[#17243a] font-sans transition-colors selection:bg-indigo-500/30 selection:text-indigo-200">
         {/* Real-time Broadcast Toast Notification */}
         {livePulse && (
           <div className="fixed top-4 right-4 z-50 p-3.5 bg-[#0e111d]/95 text-white rounded-2xl shadow-2xl border border-indigo-500/40 flex items-center gap-3 animate-slide-in backdrop-blur-xl">
@@ -1540,16 +1540,16 @@ export default function App() {
         )}
 
         {/* Global Clean Navigation Header with Logo, User & Logout */}
-        <header className="sticky top-0 z-40 bg-[#121626]/90 backdrop-blur-xl border-b border-slate-700/60 px-4 sm:px-6 py-2.5 shadow-md">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200 px-4 sm:px-6 py-2.5 shadow-sm">
+          <div className="w-full flex items-center justify-between gap-3">
             {/* Brand Logo & Title */}
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-indigo-600/30">
+              <div className="w-9 h-9 rounded-2xl bg-[#3978a8] text-white flex items-center justify-center font-black shadow-md shadow-sky-700/20">
                 <Layers className="w-5 h-5 text-white" />
               </div>
               <div className="flex items-center gap-2.5">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="font-extrabold text-base text-white tracking-tight">KROMA</h1>
+                  <h1 className="font-extrabold text-base text-[#17243a] tracking-tight">KROMA</h1>
                   <span className="px-1.5 py-0.5 rounded-md bg-indigo-600 text-white text-[10px] font-black tracking-wider uppercase">
                     OS
                   </span>
@@ -1622,7 +1622,7 @@ export default function App() {
         </header>
 
         {/* Main Content Body */}
-        <main className="max-w-7xl mx-auto p-3 sm:p-5">
+        <main className="w-full p-3 sm:p-5">
           {appMode === "calendar-broadcast" ? (
             /* Dedicated Second-Screen Wallboard / Régie Broadcast Mode */
             <div className="space-y-4">

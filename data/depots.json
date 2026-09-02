@@ -1,0 +1,46 @@
+[
+  {
+    "id": "DEP-01",
+    "code": "PARIS-NORD",
+    "name": "Dépôt Central Paris-Nord (Siège)",
+    "address": "14 Rue du Landy, 93200 Saint-Denis",
+    "city": "Paris / Saint-Denis",
+    "phone": "+33 1 48 20 30 40",
+    "isDefault": true,
+    "colorBadge": "#6366f1",
+    "description": "Hub principal : caméras cinéma, machinerie, parc audio et éclairage pro."
+  },
+  {
+    "id": "DEP-02",
+    "code": "STUDIOS-PLAINE",
+    "name": "Plateaux & Studios Plaine St-Denis",
+    "address": "45 Avenue du Président Wilson, 93210 La Plaine",
+    "city": "Saint-Denis",
+    "phone": "+33 1 49 33 22 11",
+    "isDefault": false,
+    "colorBadge": "#06b6d4",
+    "description": "Plateaux d'enregistrement, loges, régie vidéo streaming et studios podcast."
+  },
+  {
+    "id": "DEP-03",
+    "code": "LYON-CONF",
+    "name": "Hub Événements Lyon Confluence",
+    "address": "8 Rue Montrochet, 69002 Lyon",
+    "city": "Lyon",
+    "phone": "+33 4 78 50 60 70",
+    "isDefault": false,
+    "colorBadge": "#10b981",
+    "description": "Parc événementiel Rhône-Alpes, sonorisation festival et régie mobile."
+  },
+  {
+    "id": "DEP-04",
+    "code": "SUD-MARSEILLE",
+    "name": "Dépôt Sud Méditerranée - Marseille",
+    "address": "22 Boulevard de Dunkerque, 13002 Marseille",
+    "city": "Marseille",
+    "phone": "+33 4 91 10 20 30",
+    "isDefault": false,
+    "colorBadge": "#f59e0b",
+    "description": "Parc caméras plein air, kits éclairage nomades et machinerie marine."
+  }
+]
