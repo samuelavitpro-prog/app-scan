@@ -1269,10 +1269,10 @@ textarea:focus-visible {
 #desktop-dashboard.locasyst-theme .planning-view-switcher #btn-view-gantt,
 #desktop-dashboard.locasyst-theme .planning-view-switcher #btn-view-prestations,
 #desktop-dashboard.locasyst-theme .planning-view-switcher #btn-view-counter,
-#desktop-dashboard.locasyst-theme .planning-view-switcher #btn-view-inventory-blocks,
-#desktop-dashboard.locasyst-theme .planning-view-switcher .calendar-range-switch { display: none !important; }
+#desktop-dashboard.locasyst-theme .planning-view-switcher #btn-view-inventory-blocks { display: none !important; }
 #desktop-dashboard.locasyst-theme .planning-view-switcher { background: transparent !important; border: 0 !important; padding: 0 !important; }
 #desktop-dashboard.locasyst-theme .planning-view-switcher #btn-view-calendar { display: inline-flex !important; min-height: 38px; border-radius: 9px !important; background: linear-gradient(135deg, #438bb9, #28678f) !important; color: #fff !important; box-shadow: 0 5px 12px rgba(45,105,145,.24); }
+#desktop-dashboard.locasyst-theme .planning-view-switcher .calendar-range-switch { display: inline-flex !important; }
 
 /* Premium depth pass: distinct surfaces, hierarchy and operational focus. */
 #desktop-dashboard.locasyst-theme .locasyst-calendar-screen { background: radial-gradient(circle at 85% 0%, rgba(101,161,199,.12), transparent 32%), linear-gradient(135deg, #edf3f7 0%, #f8fafc 52%, #eaf2f7 100%); border-radius: 18px; padding: 18px !important; }
