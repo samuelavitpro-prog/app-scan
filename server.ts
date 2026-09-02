@@ -2187,8 +2187,12 @@ let employees: any[] = loadData<any[]>(EMPLOYEES_FILE, INITIAL_EMPLOYEES);
 let devices: any[] = loadData<any[]>(DEVICES_FILE, INITIAL_DEVICES);
 let settings: any = loadData<any>(SETTINGS_FILE, INITIAL_SETTINGS);
 let users: any[] = loadData<any[]>(USERS_FILE, INITIAL_USERS);
-let studios: any[] = loadData<any[]>(STUDIOS_FILE, INITIAL_STUDIOS);
-let technicians: any[] = loadData<any[]>(TECHNICIANS_FILE, INITIAL_TECHNICIANS);
+const loadedStudios = loadData<any[]>(STUDIOS_FILE, INITIAL_STUDIOS);
+const loadedTechnicians = loadData<any[]>(TECHNICIANS_FILE, INITIAL_TECHNICIANS);
+// Keep demo resources in their canonical modules. The quote builder only
+// consumes these collections and never invents studio/personnel rows.
+let studios: any[] = loadedStudios.length > 0 ? loadedStudios : INITIAL_STUDIOS;
+let technicians: any[] = loadedTechnicians.length > 0 ? loadedTechnicians : INITIAL_TECHNICIANS;
 const DEMO_QUOTE_IDS = new Set(["quote-lumens-226030033"]);
 let quotes: any[] = loadData<any[]>(QUOTES_FILE, INITIAL_QUOTES)
   .filter((quote) => !DEMO_QUOTE_IDS.has(quote.id));
