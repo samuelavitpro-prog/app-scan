@@ -126,16 +126,19 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   };
 
   const handleSaveQuote = async (payload: Partial<ClientQuote>) => {
+    let saved = true;
     if (editingQuote) {
       if (onUpdateQuote) {
-        await onUpdateQuote(editingQuote.id, payload);
+        saved = await onUpdateQuote(editingQuote.id, payload);
       }
     } else {
       if (onAddQuote) {
-        await onAddQuote(payload);
+        saved = await onAddQuote(payload);
       }
     }
-    setShowBuilderModal(false);
+    // Keep the editor open when the API rejects the save so the user can see
+    // the error notification and correct the form instead of losing the draft.
+    if (saved !== false) setShowBuilderModal(false);
   };
 
   const handleConvertToDossier = async (quote: ClientQuote) => {
