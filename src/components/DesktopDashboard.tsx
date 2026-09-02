@@ -901,7 +901,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
       )}
 
       {/* TOP COMMAND BAR: Global Search (Spotlight / Cmd+K), Quick Action Launcher & Connectivity */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 bg-[#161a2b] rounded-2xl border border-slate-700/60 shadow-md">
+      <div className="dashboard-command-bar flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 bg-[#161a2b] rounded-2xl border border-slate-700/60 shadow-md">
         {/* Spotlight Universal Search trigger */}
         <div className="flex items-center gap-2 flex-1 max-w-xl">
           <button
@@ -1084,7 +1084,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
       {/* Primary rental ERP tabs: the workspace is organized by business flow. */}
       <nav
         aria-label="Navigation métier"
-        className="locasyst-primary-tabs flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
+        className="dashboard-primary-nav locasyst-primary-tabs flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm"
       >
         {[
           { id: "dashboard" as MainAppNavTab, label: "Accueil" },

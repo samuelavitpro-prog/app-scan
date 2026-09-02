@@ -56,6 +56,32 @@
   padding: 14px 18px 24px;
 }
 
+/* One global header only. Navigation and quick actions live in the workspace
+ * sidebar/content, never as stacked pseudo-headers under the app header. */
+#desktop-dashboard.locasyst-theme .dashboard-command-bar,
+#desktop-dashboard.locasyst-theme .dashboard-primary-nav,
+#desktop-dashboard.locasyst-theme .event-control-header {
+  display: none !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero {
+  display: block !important;
+  min-height: 170px;
+  border-radius: var(--kroma-radius) !important;
+  background: linear-gradient(110deg, #ffffff 0%, #f4f8fb 62%, #eaf3f8 100%) !important;
+  border: 1px solid #d4e0e9 !important;
+  box-shadow: var(--kroma-shadow) !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero h2,
+#desktop-dashboard.locasyst-theme .dashboard-hero .text-white {
+  color: #1b2d43 !important;
+}
+
+#desktop-dashboard.locasyst-theme .dashboard-hero .text-slate-400 {
+  color: #647991 !important;
+}
+
 #desktop-dashboard.locasyst-theme .locasyst-sidebar {
   background: #14243b !important;
   border-color: #243b5a !important;
@@ -178,7 +204,7 @@
 }
 
 #desktop-dashboard.locasyst-theme .dashboard-hero {
-  display: none;
+  display: block !important;
 }
 
 /* Light audiovisual variant: airy workspace with restrained copper accents. */
