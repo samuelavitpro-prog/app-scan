@@ -1338,7 +1338,22 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
           {/* STEP 2: MATÉRIEL, CATALOGUE & PRESTATIONS                      */}
           {/* ============================================================= */}
           {builderStep === 2 && (
-            <div className="space-y-4 animate-fadeIn">
+            <>
+            <div className="quote-document-view animate-fadeIn">
+              <div className="quote-document-toolbar"><div><span className="quote-document-kicker">DOCUMENT DE LOCATION</span><h3>{projectName.trim() || "Nouvelle affaire"}</h3></div><button type="button" onClick={() => setIsMaterialImporterOpen(true)} className="quote-document-add"><Package size={15} /> Ajouter du matériel</button></div>
+              <div className="quote-document-head">
+                <div><span>CLIENT</span><strong>{clientCompany.trim() || clientName.trim() || "Client à renseigner"}</strong><small>{clientName || "Contact non renseigné"}</small></div>
+                <div><span>CHARGÉ D’AFFAIRES</span><strong>{projectManager || "Commercial non renseigné"}</strong><small>{projectManagerPhone || "Téléphone non renseigné"}</small></div>
+                <div><span>RÉFÉRENCE</span><strong>{clientProjectRef || "—"}</strong><small>{editingQuote?.quoteNumber || "Nouveau devis"}</small></div>
+              </div>
+              <div className="quote-document-table-wrap"><table className="quote-document-table"><thead><tr><th>Code</th><th>Désignation / produit</th><th>Qté</th><th>Jours</th><th>Prix / jour HT</th><th>Rem. %</th><th>Total HT</th><th /></tr></thead><tbody>
+                {rentalItems.map((line, index) => <tr key={`${line.itemId}-${index}`}><td className="quote-line-code">{line.itemId || "—"}</td><td><strong>{line.name}</strong><small>{line.brand || line.category || "Matériel audiovisuel"}</small></td><td>{line.quantity}</td><td>{line.days || computedShootDays}</td><td>{(line.unitPricePerDay || 0).toLocaleString("fr-FR")} €</td><td>{line.discountPercent || 0}</td><td className="quote-line-total">{line.totalHT.toLocaleString("fr-FR")} €</td><td><button type="button" onClick={() => setRentalItems((prev) => prev.filter((_, i) => i !== index))} className="quote-line-delete"><Trash2 size={14} /></button></td></tr>)}
+                {Array.from({ length: Math.max(5, 9 - rentalItems.length) }).map((_, index) => <tr className="quote-empty-line" key={`empty-${index}`}><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td><td> </td></tr>)}
+              </tbody><tfoot><tr><td colSpan={6}>Sous-total matériel HT</td><td>{equipmentSubTotalHT.toLocaleString("fr-FR")} €</td><td /></tr></tfoot></table></div>
+              <div className="quote-document-bottom"><div className="quote-document-logistics"><div><span>DÉPART MATÉRIEL</span><strong>{departureDate || "—"}</strong><small>{departureTimeSlot} · {settings?.warehouseName || "Dépôt principal"}</small></div><div><span>RETOUR PRÉVU</span><strong>{returnDate || "—"}</strong><small>{returnTimeSlot}</small></div><div><span>LIEU / LIVRAISON</span><strong>{eventLocation || "—"}</strong><small>{eventLocation || clientAddress || "Adresse à renseigner"}</small></div></div><div className="quote-document-total"><span>TOTAL ESTIMÉ TTC</span><strong>{totalTTC.toLocaleString("fr-FR")} €</strong><small>HT : {totalHT.toLocaleString("fr-FR")} € · TVA {taxRate}%</small></div></div>
+              <div className="quote-document-actions"><button type="button" onClick={() => setBuilderStep(1)} className="quote-document-back"><ChevronLeft size={15} /> Modifier l’affaire</button><button type="button" onClick={() => setBuilderStep(3)} className="quote-document-next">Continuer vers Conditions & Totaux <ChevronRight size={15} /></button></div>
+            </div>
+            {false && (             <div className="space-y-4 animate-fadeIn">
               {/* Quick Preset Packs Bar */}
               <div className="quote-builder-preset-packs p-3.5 rounded-2xl bg-[#121626] border border-[#232a48] space-y-2">
                 <div className="flex items-center justify-between">
@@ -2119,7 +2134,8 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            </div>)}
+            </>
           )}
 
           {/* ============================================================= */}
