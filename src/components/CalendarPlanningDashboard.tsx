@@ -132,7 +132,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
   const safeDepots = depots || [];
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [planningView, setPlanningView] = useState<"gantt-resources" | "calendar-grid" | "prestations" | "today-counter" | "inventory-blocks">("gantt-resources");
+  const [planningView, setPlanningView] = useState<"gantt-resources" | "calendar-grid" | "prestations" | "today-counter" | "inventory-blocks">("calendar-grid");
   const [calendarRange, setCalendarRange] = useState<"day" | "week" | "month">("month");
   const [filterType, setFilterType] = useState<"all" | "rentals" | "studios" | "crew" | "inventory_blocks">("all");
   const [validationFilter, setValidationFilter] = useState<"all" | "validated_only" | "drafts">("all");
@@ -1010,13 +1010,13 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-white">Planning & Calendrier des Locations</h2>
+                <h2 className="text-lg font-bold text-white">Calendrier mensuel des locations</h2>
                 <span className="px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800 text-[10px] font-bold">
                   Module KROMA Planning
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Visualisation chronologique des sorties matériels, réservation studios, techniciens et blocages d'inventaires.
+                Visualisez les prestations, sorties matériel, studios, techniciens et blocages directement sur le mois.
               </p>
             </div>
           </div>
