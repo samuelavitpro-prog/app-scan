@@ -1238,6 +1238,33 @@ textarea:focus-visible {
   }
 }
 
+/* Planning hierarchy and contrast pass. */
+#desktop-dashboard.locasyst-theme .planning-shell { padding: 22px !important; background: #fff !important; }
+#desktop-dashboard.locasyst-theme .planning-shell > div:first-child { padding-bottom: 18px; border-bottom: 1px solid #dbe5ed; }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-controls { padding-top: 14px; border-top: 0; }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher { gap: 3px; padding: 4px; border: 1px solid #d4e0e9; border-radius: 10px; background: #f2f6f9 !important; }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button { min-height: 36px; border-radius: 7px; color: #5b7289 !important; }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button:hover { background: #e5eff5 !important; color: #2d5f82 !important; }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button.bg-indigo-600,
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button.bg-cyan-600,
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button.bg-amber-600 { background: #397eaf !important; color: #fff !important; box-shadow: 0 3px 8px rgba(57,126,175,.2); }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button.bg-indigo-600 span,
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button.bg-cyan-600 span,
+#desktop-dashboard.locasyst-theme .planning-shell .planning-view-switcher > button.bg-amber-600 span { color: #fff !important; }
+#desktop-dashboard.locasyst-theme .planning-shell .calendar-range-switch { margin-left: 4px; border-color: #cbd9e5; background: #fff; }
+#desktop-dashboard.locasyst-theme .planning-shell .calendar-range-switch button.is-active { background: #397eaf; color: #fff !important; }
+#desktop-dashboard.locasyst-theme .planning-shell .planning-controls select { border: 0 !important; background: transparent !important; }
+#desktop-dashboard.locasyst-theme .planning-shell > div:first-child button.bg-indigo-600,
+#desktop-dashboard.locasyst-theme .planning-shell > div:first-child button.bg-slate-800 { color: #fff !important; }
+#desktop-dashboard.locasyst-theme .planning-shell > div:first-child button.bg-indigo-600 svg,
+#desktop-dashboard.locasyst-theme .planning-shell > div:first-child button.bg-slate-800 svg { color: #fff !important; }
+#desktop-dashboard.locasyst-theme .planning-shell > div:last-child { border-color: #dbe5ed; }
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > [class*="bg-[#0e111e"] { background: #fff !important; }
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > [class*="bg-[#0e111e"] [class*="bg-[#0a0d18"],
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > [class*="bg-[#0e111e"] [class*="bg-[#0c0f1d"] { background: #eef4f8 !important; color: #3b5872 !important; }
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > [class*="bg-[#0e111e"] [class*="bg-[#0a0d18"] .text-white,
+#desktop-dashboard.locasyst-theme .locasyst-calendar-screen > [class*="bg-[#0e111e"] [class*="bg-[#0c0f1d"] .text-slate-300 { color: #29445e !important; }
+
 /* Planning screen: same calm, readable Locasyst treatment as the commercial flow. */
 #desktop-dashboard.locasyst-theme .locasyst-calendar-screen {
   color: var(--kroma-ink);

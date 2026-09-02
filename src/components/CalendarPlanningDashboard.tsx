@@ -1001,7 +1001,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
       {/* ========================================================================= */}
       {/* NORMAL DASHBOARD HEADER & CONTROLS */}
       {/* ========================================================================= */}
-      <div className="bg-[#0e111e] border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
+      <div className="planning-shell bg-[#0e111e] border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
         {/* Top title and secondary screen trigger */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -1071,9 +1071,9 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
         </div>
 
         {/* Filters & View Switchers Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
+        <div className="planning-controls flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-800/80">
           {/* Left: View Modes */}
-          <div className="flex items-center gap-1.5 bg-[#141829] p-1 rounded-2xl border border-slate-800 flex-wrap">
+          <div className="planning-view-switcher flex items-center gap-1.5 bg-[#141829] p-1 rounded-2xl border border-slate-800 flex-wrap">
             <button
               type="button"
               id="btn-view-gantt"
