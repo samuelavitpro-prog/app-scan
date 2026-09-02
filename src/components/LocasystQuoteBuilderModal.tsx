@@ -234,6 +234,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
   const [catalogSearch, setCatalogSearch] = useState<string>("");
   const [catalogCategoryFilter, setCatalogCategoryFilter] = useState<string>("all");
   const [catalogTypeFilter, setCatalogTypeFilter] = useState<string>("all");
+  const [catalogQuantities, setCatalogQuantities] = useState<Record<string, number>>({});
   
   // Dropdown equipment selector state
   const [selectedDropdownItemId, setSelectedDropdownItemId] = useState<string>("");
@@ -2383,9 +2384,9 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
               </div>
               <div className="material-importer-count">{filteredCatalogItems.length} article(s) trouvé(s) · Cliquez sur Ajouter pour constituer le devis</div>
               <div className="material-importer-grid">
-                {filteredCatalogItems.map((item) => { const selected = rentalItems.some((line) => line.itemId === item.id); const available = item.availableQuantity ?? 0; return <article className="material-card" key={item.id}>
+                {filteredCatalogItems.map((item) => { const selected = rentalItems.some((line) => line.itemId === item.id); const available = item.availableQuantity ?? 0; const quantity = catalogQuantities[item.id] || 1; return <article className="material-card" key={item.id}>
                   <div className="material-card-image">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Package size={30} />}</div>
-                  <div className="material-card-body"><div className="material-card-category">{item.category} · {item.brand}</div><h4>{item.name}</h4><p>{item.description || item.technicalSubDesignation || "Matériel audiovisuel"}</p><div className="material-card-meta"><span>{item.rentalRatePerDay || 25} €/jour</span><span className={available > 0 ? "is-available" : "is-unavailable"}>{available > 0 ? `${available} disponible(s)` : "Indisponible"}</span></div><button type="button" onClick={() => handleAddItemFromCatalog(item)} className={selected ? "material-card-add is-added" : "material-card-add"}><Plus size={15} /> {selected ? "Ajouter encore" : "Ajouter au devis"}</button></div>
+                  <div className="material-card-body"><div className="material-card-category">{item.category} · {item.brand}</div><h4>{item.name}</h4><p>{item.description || item.technicalSubDesignation || "Matériel audiovisuel"}</p><div className="material-card-meta"><span>{item.rentalRatePerDay || 25} €/jour</span><span className={available > 0 ? "is-available" : "is-unavailable"}>{available > 0 ? `${available} disponible(s)` : "Indisponible"}</span></div><div className="material-card-actions"><div className="material-quantity-stepper"><button type="button" onClick={() => setCatalogQuantities((prev) => ({ ...prev, [item.id]: Math.max(1, quantity - 1) }))}>−</button><input aria-label={`Quantité de ${item.name}`} type="number" min={1} value={quantity} onChange={(e) => setCatalogQuantities((prev) => ({ ...prev, [item.id]: Math.max(1, Number(e.target.value) || 1) }))} /><button type="button" onClick={() => setCatalogQuantities((prev) => ({ ...prev, [item.id]: quantity + 1 }))}>+</button></div><button type="button" onClick={() => handleAddItemWithQuantity(item, quantity)} className={selected ? "material-card-add is-added" : "material-card-add"}><Plus size={15} /> {selected ? "Ajouter encore" : "Ajouter"}</button></div></div>
                 </article>; })}
               </div>
               {filteredCatalogItems.length === 0 && <div className="material-importer-empty"><Package size={34} /><strong>Aucun matériel trouvé</strong><span>Essayez un nom, un type ou une autre catégorie.</span></div>}
