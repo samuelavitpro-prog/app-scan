@@ -880,14 +880,6 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
 
           <div className="flex items-center gap-2">
             <button
-              type="button"
-              onClick={() => setIsMaterialImporterOpen(true)}
-              className="quote-builder-import-button py-1.5 px-3 rounded-xl bg-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 transition"
-            >
-              <Package className="w-3.5 h-3.5" />
-              Importer du matériel
-            </button>
-            <button
               onClick={onClose}
               className="p-2 rounded-xl text-slate-400 hover:text-white bg-[#1b213b] hover:bg-[#252e52] transition"
             >
@@ -2377,19 +2369,22 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                 <div><div className="material-importer-kicker">CATALOGUE MATÉRIEL</div><h3>Ajouter du matériel</h3><p>Recherchez une référence puis ajoutez-la au devis. Vous pouvez continuer à ajouter plusieurs articles.</p></div>
                 <button type="button" onClick={() => setIsMaterialImporterOpen(false)} className="material-importer-close"><X size={20} /></button>
               </div>
-              <div className="material-importer-filters">
+              <div className="material-importer-tabs"><button type="button" className={activeItemTab === "equipment" ? "is-active" : ""} onClick={() => setActiveItemTab("equipment")}><Package size={15} /> Matériel <span>{rentalItems.length}</span></button><button type="button" className={activeItemTab === "studios" ? "is-active" : ""} onClick={() => setActiveItemTab("studios")}><Building2 size={15} /> Studios <span>{studioRentals.length}</span></button><button type="button" className={activeItemTab === "technicians" ? "is-active" : ""} onClick={() => setActiveItemTab("technicians")}><Users size={15} /> Personnel <span>{crewStaff.length}</span></button></div>
+              <div className={`material-importer-filters ${activeItemTab !== "equipment" ? "hidden" : ""}`}>
                 <div className="material-importer-search"><Search size={17} /><input value={catalogSearch} onChange={(e) => setCatalogSearch(e.target.value)} placeholder="Rechercher par nom, type, catégorie ou marque..." autoFocus /></div>
                 <select value={catalogTypeFilter} onChange={(e) => setCatalogTypeFilter(e.target.value)}><option value="all">Tous les types</option><option value="serialized">À l’unité</option><option value="bulk_quantity">Quantitatif</option><option value="consumable">Consommable</option></select>
                 <select value={catalogCategoryFilter} onChange={(e) => setCatalogCategoryFilter(e.target.value)}><option value="all">Toutes les catégories</option>{[...new Set(safeCatalogList.map((item) => item.category))].map((category) => <option key={category} value={category}>{category}</option>)}</select>
               </div>
-              <div className="material-importer-count">{filteredCatalogItems.length} article(s) trouvé(s) · Cliquez sur Ajouter pour constituer le devis</div>
-              <div className="material-importer-grid">
+              <div className={`material-importer-count ${activeItemTab !== "equipment" ? "hidden" : ""}`}>{filteredCatalogItems.length} article(s) trouvé(s) · Cliquez sur Ajouter pour constituer le devis</div>
+              <div className={`material-importer-grid ${activeItemTab !== "equipment" ? "hidden" : ""}`}>
                 {filteredCatalogItems.map((item) => { const selected = rentalItems.some((line) => line.itemId === item.id); const available = item.availableQuantity ?? 0; const quantity = catalogQuantities[item.id] || 1; return <article className="material-card" key={item.id}>
                   <div className="material-card-image">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <Package size={30} />}</div>
                   <div className="material-card-body"><div className="material-card-category">{item.category} · {item.brand}</div><h4>{item.name}</h4><p>{item.description || item.technicalSubDesignation || "Matériel audiovisuel"}</p><div className="material-card-meta"><span>{item.rentalRatePerDay || 25} €/jour</span><span className={available > 0 ? "is-available" : "is-unavailable"}>{available > 0 ? `${available} disponible(s)` : "Indisponible"}</span></div><div className="material-card-actions"><div className="material-quantity-stepper"><button type="button" onClick={() => setCatalogQuantities((prev) => ({ ...prev, [item.id]: Math.max(1, quantity - 1) }))}>−</button><input aria-label={`Quantité de ${item.name}`} type="number" min={1} value={quantity} onChange={(e) => setCatalogQuantities((prev) => ({ ...prev, [item.id]: Math.max(1, Number(e.target.value) || 1) }))} /><button type="button" onClick={() => setCatalogQuantities((prev) => ({ ...prev, [item.id]: quantity + 1 }))}>+</button></div><button type="button" onClick={() => handleAddItemWithQuantity(item, quantity)} className={selected ? "material-card-add is-added" : "material-card-add"}><Plus size={15} /> {selected ? "Ajouter encore" : "Ajouter"}</button></div></div>
                 </article>; })}
               </div>
-              {filteredCatalogItems.length === 0 && <div className="material-importer-empty"><Package size={34} /><strong>Aucun matériel trouvé</strong><span>Essayez un nom, un type ou une autre catégorie.</span></div>}
+              {activeItemTab === "equipment" && filteredCatalogItems.length === 0 && <div className="material-importer-empty"><Package size={34} /><strong>Aucun matériel trouvé</strong><span>Essayez un nom, un type ou une autre catégorie.</span></div>}
+              {activeItemTab === "studios" && <div className="material-resource-list">{(studios.length ? studios : [{ id: "studio-demo", name: "Plateau Principal", dailyRate: 1200 } as StudioSpace]).map((studio) => <div className="material-resource-row" key={studio.id}><div><strong>{studio.name}</strong><span>Plateau / espace de production</span></div><b>{studio.dailyRate || 1200} €/jour</b><button type="button" onClick={() => handleAddStudioLine()}><Plus size={15} /> Ajouter</button></div>)}</div>}
+              {activeItemTab === "technicians" && <div className="material-resource-list">{(technicians.length ? technicians : [{ id: "tech-demo", name: "Régisseur Général", dailyRate: 450 } as TechnicianProfile]).map((tech) => <div className="material-resource-row" key={tech.id}><div><strong>{tech.name}</strong><span>Équipe technique / régie</span></div><b>{tech.dailyRate || 450} €/jour</b><button type="button" onClick={() => handleAddCrewLine()}><Plus size={15} /> Ajouter</button></div>)}</div>}
               <div className="material-importer-footer"><span>{rentalItems.length} ligne(s) déjà ajoutée(s) au devis</span><button type="button" onClick={() => setIsMaterialImporterOpen(false)} className="material-importer-done"><Check size={16} /> Terminer les ajouts</button></div>
             </div>
           </div>
