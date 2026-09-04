@@ -431,9 +431,6 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                           <span className="px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-bold">
                             {durationText(q)}
                           </span>
-                          <span className="text-slate-400 font-mono">
-                            Coeff {q.globalRentalCoefficient || 1.0}
-                          </span>
                           {q.hasPrepDay && (
                             <span className="px-1.5 py-0.2 rounded bg-amber-950/70 text-amber-300 border border-amber-800 font-semibold text-[10px]">
                               Prep Day
