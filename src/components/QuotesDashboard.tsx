@@ -93,12 +93,12 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const safeSuppliers = suppliers || [];
   const isCinemaProfile = activeProfile?.id === "cinema";
   const isWeddingProfile = activeProfile?.id === "wedding";
-  const projectColumnLabel = isCinemaProfile ? "Projet / Film & Production" : isWeddingProfile ? "Mariage / Événement" : "Affaire / Événement";
-  const datesColumnLabel = isCinemaProfile ? "Dates tournage & barème" : isWeddingProfile ? "Dates cérémonie & prestation" : "Dates événement & barème";
+  const projectColumnLabel = isCinemaProfile ? "Projet / Film & Production" : isWeddingProfile ? "Mariage" : "Affaire";
+  const datesColumnLabel = isCinemaProfile ? "Dates tournage & barème" : isWeddingProfile ? "Dates cérémonie" : "Dates";
   const durationLabel = isCinemaProfile ? "tournage" : isWeddingProfile ? "prestation" : "événement";
   const durationText = (quote: ClientQuote) => isCinemaProfile
     ? `${quote.shootDaysCount || quote.durationDays || 1}j tournage`
-    : `${quote.shootDaysCount || quote.durationDays || 1} jour(s) ${durationLabel}`;
+    : `${quote.shootDaysCount || quote.durationDays || 1} jour(s)`;
   
   const safeInventoryItems = useMemo(() => {
     const raw = (inventoryItems && inventoryItems.length > 0) ? inventoryItems : ((inventory && inventory.length > 0) ? inventory : []);
