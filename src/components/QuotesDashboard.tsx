@@ -112,6 +112,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const [editingQuote, setEditingQuote] = useState<ClientQuote | null>(null);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ quote: ClientQuote; x: number; y: number } | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" }>({ key: "date", direction: "desc" });
 
   const handleOpenCreateModal = () => {
     setEditingQuote(null);
@@ -204,6 +205,35 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
     const matchesStatus = statusFilter === "all" || q.status === statusFilter;
     return matchesQuery && matchesStatus;
   });
+
+  const sortedQuotes = [...filteredQuotes].sort((a, b) => {
+    const valueFor = (quote: ClientQuote) => {
+      switch (sortConfig.key) {
+        case "number": return quote.quoteNumber;
+        case "affair": return quote.projectName || quote.clientCompany || quote.clientName;
+        case "dates": return quote.startDate;
+        case "amount": return quote.totalHT || 0;
+        case "subloc": return (quote.rentalItems || []).filter((item) => item.isSubRental).length;
+        case "deposit": return quote.depositAmount || 0;
+        case "status": return quote.status;
+        default: return quote.date;
+      }
+    };
+    const left = valueFor(a);
+    const right = valueFor(b);
+    const result = typeof left === "number" && typeof right === "number"
+      ? left - right
+      : String(left).localeCompare(String(right), "fr", { numeric: true, sensitivity: "base" });
+    return sortConfig.direction === "asc" ? result : -result;
+  });
+
+  const handleSort = (key: string) => {
+    setSortConfig((current) => current.key === key
+      ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
+      : { key, direction: "asc" });
+  };
+
+  const sortIndicator = (key: string) => sortConfig.key === key ? (sortConfig.direction === "asc" ? "↑" : "↓") : "↕";
 
   const selectedQuote = filteredQuotes.find((q) => q.id === selectedQuoteId) || filteredQuotes[0] || null;
 
@@ -376,18 +406,18 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-[#181d33] border-b border-[#232a48] text-[11px] uppercase tracking-wider text-slate-400 font-bold">
               <tr>
-                <th className="py-3.5 px-4">N° Devis & Date</th>
-                <th className="py-3.5 px-4">{projectColumnLabel}</th>
-                <th className="py-3.5 px-4">{datesColumnLabel}</th>
-                <th className="py-3.5 px-4 text-center">Sous-Loc Confrère</th>
-                <th className="py-3.5 px-4 text-right">Montant HT</th>
-                <th className="py-3.5 px-4 text-center">Acompte & Caution</th>
-                <th className="py-3.5 px-4 text-center">Statut</th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("number")}>N° Devis & Date <span>{sortIndicator("number")}</span></button></th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("affair")}>{projectColumnLabel} <span>{sortIndicator("affair")}</span></button></th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("dates")}>{datesColumnLabel} <span>{sortIndicator("dates")}</span></button></th>
+                <th className="py-3.5 px-4 text-center"><button type="button" className="quote-sort-button quote-sort-centered" onClick={() => handleSort("subloc")}>Sous-Loc Confrère <span>{sortIndicator("subloc")}</span></button></th>
+                <th className="py-3.5 px-4 text-right"><button type="button" className="quote-sort-button quote-sort-right" onClick={() => handleSort("amount")}>Montant HT <span>{sortIndicator("amount")}</span></button></th>
+                <th className="py-3.5 px-4 text-center"><button type="button" className="quote-sort-button quote-sort-centered" onClick={() => handleSort("deposit")}>Acompte & Caution <span>{sortIndicator("deposit")}</span></button></th>
+                <th className="py-3.5 px-4 text-center"><button type="button" className="quote-sort-button quote-sort-centered" onClick={() => handleSort("status")}>Statut <span>{sortIndicator("status")}</span></button></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1e243d]">
               {filteredQuotes.length > 0 ? (
-                filteredQuotes.map((q) => {
+                sortedQuotes.map((q) => {
                   const subCount = (q.rentalItems || []).filter((i) => i.isSubRental).length;
                   return (
                     <tr key={q.id} onClick={() => setSelectedQuoteId(q.id)} onContextMenu={(event) => handleQuoteContextMenu(event, q)} className={`quote-row hover:bg-[#161c33] transition-colors ${selectedQuote?.id === q.id ? "quote-row-selected" : ""}`}>

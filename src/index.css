@@ -770,6 +770,22 @@
   border-right: 1px solid #d6e1ea;
   white-space: nowrap;
 }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-button:hover { color: #3978a8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-button span { color: #3978a8; font-size: 13px; line-height: 1; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-centered { justify-content: center; width: 100%; text-align: center; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-right { justify-content: flex-end; width: 100%; text-align: right; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody tr {
   min-height: 68px;
   background: #fff;
