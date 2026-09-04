@@ -346,7 +346,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
               {st === "all"
                 ? "Tous"
                 : st === "draft"
-                ? "Brouillons"
+                ? "Devis"
                 : st === "sent"
                 ? "Envoyés"
                 : st === "accepted"
