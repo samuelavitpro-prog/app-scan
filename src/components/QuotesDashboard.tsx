@@ -455,9 +455,6 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                           {(q.totalHT || 0).toLocaleString("fr-FR")} €{" "}
                           <span className="text-[10px] text-slate-400 font-normal">HT</span>
                         </div>
-                        <span className="text-[11px] text-emerald-400 font-bold block mt-0.5">
-                          {(q.totalTTC || 0).toLocaleString("fr-FR")} € TTC
-                        </span>
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
