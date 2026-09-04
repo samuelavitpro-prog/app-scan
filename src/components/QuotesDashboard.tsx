@@ -96,6 +96,9 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const projectColumnLabel = isCinemaProfile ? "Projet / Film & Production" : isWeddingProfile ? "Mariage / Événement" : "Affaire / Événement";
   const datesColumnLabel = isCinemaProfile ? "Dates tournage & barème" : isWeddingProfile ? "Dates cérémonie & prestation" : "Dates événement & barème";
   const durationLabel = isCinemaProfile ? "tournage" : isWeddingProfile ? "prestation" : "événement";
+  const durationText = (quote: ClientQuote) => isCinemaProfile
+    ? `${quote.shootDaysCount || quote.durationDays || 1}j tournage`
+    : `${quote.shootDaysCount || quote.durationDays || 1} jour(s) ${durationLabel}`;
   
   const safeInventoryItems = useMemo(() => {
     const raw = (inventoryItems && inventoryItems.length > 0) ? inventoryItems : ((inventory && inventory.length > 0) ? inventory : []);
@@ -378,7 +381,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                 <th className="py-3.5 px-4">{projectColumnLabel}</th>
                 <th className="py-3.5 px-4">{datesColumnLabel}</th>
                 <th className="py-3.5 px-4 text-center">Sous-Loc Confrère</th>
-                <th className="py-3.5 px-4 text-right">Montants HT / TTC</th>
+                <th className="py-3.5 px-4 text-right">Montant HT</th>
                 <th className="py-3.5 px-4 text-center">Acompte & Caution</th>
                 <th className="py-3.5 px-4 text-center">Statut</th>
               </tr>
@@ -426,7 +429,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 mt-0.5 text-[11px]">
                           <span className="px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-bold">
-                            {q.shootDaysCount || q.durationDays || 1}j {durationLabel}
+                            {durationText(q)}
                           </span>
                           <span className="text-slate-400 font-mono">
                             Coeff {q.globalRentalCoefficient || 1.0}
