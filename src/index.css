@@ -706,6 +706,59 @@
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-rental { background: #edf0ff; color: #5147b8; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-returned { background: #fff4d9; color: #9a6812; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-issue { background: #fdebed; color: #b33d52; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-workspace { grid-template-columns: 1fr; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-detail-panel { display: none; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-row { cursor: context-menu; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu {
+  position: fixed;
+  z-index: 81;
+  width: 265px;
+  padding: 7px;
+  border: 1px solid #cbd9e5;
+  border-radius: 10px;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 18px 45px rgba(24, 52, 78, .2);
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 9px 9px;
+  border-bottom: 1px solid #e5ebf1;
+  color: #8191a4;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-heading strong { color: #24374e; font-size: 11px; letter-spacing: 0; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 9px;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #536a82;
+  font-size: 11px;
+  font-weight: 750;
+  text-align: left;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button:hover { background: #edf5fa; color: #3978a8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button svg { width: 15px; height: 15px; color: #3978a8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button.quote-context-danger { color: #b33d52; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button.quote-context-danger svg { color: #b33d52; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail { display: grid; min-height: 390px; place-content: center; justify-items: center; gap: 9px; color: #9aa8b7; text-align: center; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail strong { color: #536a82; font-size: 13px; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail p { max-width: 190px; margin: 0; font-size: 11px; }

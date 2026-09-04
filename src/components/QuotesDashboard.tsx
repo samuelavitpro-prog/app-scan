@@ -11,6 +11,7 @@ import {
   Edit2,
   TrendingUp,
   Globe,
+  CheckCircle2,
 } from "lucide-react";
 import {
   ClientQuote,
@@ -103,6 +104,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const [showPortalModalQuote, setShowPortalModalQuote] = useState<ClientQuote | null>(null);
   const [editingQuote, setEditingQuote] = useState<ClientQuote | null>(null);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ quote: ClientQuote; x: number; y: number } | null>(null);
 
   const handleOpenCreateModal = () => {
     setEditingQuote(null);
@@ -112,6 +114,24 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const handleOpenEditModal = (q: ClientQuote) => {
     setEditingQuote(q);
     setShowBuilderModal(true);
+  };
+
+  const handleQuoteContextMenu = (event: React.MouseEvent, quote: ClientQuote) => {
+    event.preventDefault();
+    setSelectedQuoteId(quote.id);
+    setContextMenu({
+      quote,
+      x: Math.min(event.clientX, window.innerWidth - 280),
+      y: Math.min(event.clientY, window.innerHeight - 330),
+    });
+  };
+
+  const closeContextMenu = () => setContextMenu(null);
+
+  const updateQuoteStatus = async (quote: ClientQuote, updates: Partial<ClientQuote>) => {
+    if (!onUpdateQuote) return;
+    await onUpdateQuote(quote.id, updates);
+    closeContextMenu();
   };
 
   const handleDuplicateQuote = async (quote: ClientQuote) => {
@@ -364,7 +384,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                 filteredQuotes.map((q) => {
                   const subCount = (q.rentalItems || []).filter((i) => i.isSubRental).length;
                   return (
-                    <tr key={q.id} onClick={() => setSelectedQuoteId(q.id)} className={`quote-row hover:bg-[#161c33] transition-colors ${selectedQuote?.id === q.id ? "quote-row-selected" : ""}`}>
+                    <tr key={q.id} onClick={() => setSelectedQuoteId(q.id)} onContextMenu={(event) => handleQuoteContextMenu(event, q)} className={`quote-row hover:bg-[#161c33] transition-colors ${selectedQuote?.id === q.id ? "quote-row-selected" : ""}`}>
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-white flex items-center gap-1.5">
                           <FileText className="w-3.5 h-3.5 text-indigo-400" />
@@ -509,6 +529,34 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
           </table>
         </div>
       </div>
+
+      {contextMenu && (
+        <>
+          <button type="button" aria-label="Fermer le menu" className="quote-context-backdrop" onClick={closeContextMenu} />
+          <div className="quote-context-menu" style={{ left: contextMenu.x, top: contextMenu.y }} role="menu">
+            <div className="quote-context-heading">
+              <span>Actions du devis</span>
+              <strong>{contextMenu.quote.quoteNumber}</strong>
+            </div>
+            <button type="button" onClick={() => { handleOpenEditModal(contextMenu.quote); closeContextMenu(); }}><Edit2 /> Modifier le devis</button>
+            {contextMenu.quote.status === "draft" && (
+              <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { status: "accepted" })}><CheckCircle2 /> Passer en Validé</button>
+            )}
+            {!contextMenu.quote.rentalStatus && contextMenu.quote.status !== "draft" && (
+              <button type="button" onClick={() => { closeContextMenu(); handleConvertToDossier(contextMenu.quote); }}><Truck /> Préparer le dossier</button>
+            )}
+            {contextMenu.quote.rentalStatus === "preparing" && (
+              <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { rentalStatus: "ready" })}><CheckCircle2 /> Marquer Prêt</button>
+            )}
+            {contextMenu.quote.rentalStatus === "ready" && (
+              <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { rentalStatus: "in_rental" })}><Truck /> Passer En location</button>
+            )}
+            <button type="button" onClick={() => { setShowPrintModal(contextMenu.quote); closeContextMenu(); }}><Printer /> Générer un document</button>
+            <button type="button" onClick={() => { handleDuplicateQuote(contextMenu.quote); closeContextMenu(); }}><Copy /> Dupliquer</button>
+            {onDeleteQuote && <button type="button" className="quote-context-danger" onClick={() => { onDeleteQuote(contextMenu.quote.id); closeContextMenu(); }}><Trash2 /> Supprimer</button>}
+          </div>
+        </>
+      )}
 
       <aside className="quote-detail-panel">
         {selectedQuote ? (
