@@ -1071,7 +1071,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                       onChange={(e) => setQuoteStatus(e.target.value as any)}
                       className="w-full bg-[#181d33] border border-[#273052] rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none font-bold"
                     >
-                      <option value="draft">Brouillon</option>
+                      <option value="draft">Devis</option>
                       <option value="sent">Envoyé au client</option>
                       <option value="accepted">Accepté / Signé</option>
                       <option value="invoiced">Facturé</option>
@@ -2336,7 +2336,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
 
           <aside className="quote-builder-summary" aria-label="Résumé du devis">
             <div className="quote-summary-kicker">SYNTHÈSE EN DIRECT</div>
-            <div className="quote-summary-status">{quoteStatus === "draft" ? "Brouillon" : quoteStatus === "sent" ? "Envoyé" : quoteStatus === "accepted" ? "Accepté" : quoteStatus}</div>
+            <div className="quote-summary-status">{quoteStatus === "draft" ? "Devis" : quoteStatus === "sent" ? "Envoyé" : quoteStatus === "accepted" ? "Validé" : quoteStatus}</div>
             <h3>{projectName.trim() || "Nouvelle affaire"}</h3>
             <p>{clientCompany.trim() || "Client à renseigner"}</p>
             <div className="quote-summary-divider" />

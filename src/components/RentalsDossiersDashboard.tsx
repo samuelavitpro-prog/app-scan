@@ -157,7 +157,7 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
     (q) => (q.rentalStatus || "in_rental") === "in_rental"
   );
   const overdueRentals = rentalQuotes.filter((q) => {
-    const isRental = (q.rentalStatus || "in_rental") === "in_rental";
+    const isRental = q.rentalStatus === "ready" || q.rentalStatus === "in_rental" || !q.rentalStatus;
     if (!isRental) return false;
     const end = new Date(q.endDate);
     return end < now;
@@ -174,8 +174,8 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
 
   // Filter rentals based on filter pills and query
   const filteredRentals = rentalQuotes.filter((q) => {
-    const isOverdue = new Date(q.endDate) < now && (q.rentalStatus || "in_rental") === "in_rental";
-    const currentStatus: RentalOrderStatus = q.rentalStatus || (isOverdue ? "overdue" : "in_rental");
+    const isOverdue = new Date(q.endDate) < now && (q.rentalStatus === "ready" || q.rentalStatus === "in_rental" || !q.rentalStatus);
+    const currentStatus: RentalOrderStatus = isOverdue ? "overdue" : (q.rentalStatus || "in_rental");
     
     if (statusFilter !== "all") {
       if (statusFilter === "overdue" && currentStatus !== "overdue") return false;
@@ -565,8 +565,8 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
           </div>
         ) : (
           filteredRentals.map((quote) => {
-            const isOverdue = new Date(quote.endDate) < now && (quote.rentalStatus || "in_rental") === "in_rental";
-            const currentStatus: RentalOrderStatus = quote.rentalStatus || (isOverdue ? "overdue" : "in_rental");
+            const isOverdue = new Date(quote.endDate) < now && (quote.rentalStatus === "ready" || quote.rentalStatus === "in_rental" || !quote.rentalStatus);
+            const currentStatus: RentalOrderStatus = isOverdue ? "overdue" : (quote.rentalStatus || "in_rental");
             const itemsCount = (quote.rentalItems || []).reduce((sum, i) => sum + i.quantity, 0);
 
             // Compute incomplete summary count
@@ -630,6 +630,16 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
                   {/* Status Badges & Quick Action Buttons */}
                   <div className="flex items-center gap-2 flex-wrap justify-end">
                     {/* Status Badge */}
+                    {currentStatus === "preparing" && (
+                      <span className="px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-500/30 text-[11px] font-bold flex items-center gap-1">
+                        <Package className="w-3 h-3 text-blue-400" /> Préparation
+                      </span>
+                    )}
+                    {currentStatus === "ready" && (
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Prêt
+                      </span>
+                    )}
                     {currentStatus === "in_rental" && (
                       <span className="px-2.5 py-1 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold flex items-center gap-1">
                         <ArrowUpRight className="w-3 h-3 text-indigo-400" /> En Tournage
@@ -641,8 +651,8 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
                       </span>
                     )}
                     {currentStatus === "incomplete_return" && (
-                      <span className="px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3 text-amber-400" /> Retour Incomplet ({missingUnitsCount} manquants)
+                      <span className="px-2.5 py-1 rounded-full bg-rose-950 text-rose-300 border border-rose-500/40 text-[11px] font-bold flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3 text-rose-400" /> Retour Incomplet ({missingUnitsCount} manquants)
                       </span>
                     )}
                     {currentStatus === "disputed" && (
@@ -651,8 +661,8 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
                       </span>
                     )}
                     {currentStatus === "returned" && (
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Retour Conforme
+                      <span className="px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-amber-400" /> Retour Complet
                       </span>
                     )}
 
@@ -693,6 +703,18 @@ export const RentalsDossiersDashboard: React.FC<RentalsDossiersDashboardProps> =
                       <PenTool className="w-3.5 h-3.5 text-indigo-400" />
                       <span>✍️ Signer</span>
                     </button>
+
+                    {/* VALIDATION PRÉPARATION */}
+                    {currentStatus === "preparing" && (
+                      <button
+                        onClick={() => onUpdateQuote(quote.id, { rentalStatus: "ready" })}
+                        className="py-1.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400 text-white text-xs font-bold flex items-center gap-1 transition"
+                        title="Confirmer que le matériel est prêt"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Marquer prêt</span>
+                      </button>
+                    )}
 
                     {/* OPEN DOSSIER BUTTON */}
                     <button

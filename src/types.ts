@@ -631,7 +631,7 @@ export interface RentalItemCheckinRecord {
   inspectedBy?: string;
 }
 
-export type RentalOrderStatus = 'preparing' | 'in_rental' | 'overdue' | 'returned' | 'incomplete_return' | 'disputed' | 'cancelled';
+export type RentalOrderStatus = 'preparing' | 'ready' | 'reserved' | 'in_rental' | 'overdue' | 'returned' | 'incomplete_return' | 'disputed' | 'cancelled';
 
 export type DocumentPrintType = 
   | 'devis' 
@@ -1175,6 +1175,4 @@ export interface NetworkDisplayScreen {
   createdAt: string;
   updatedAt: string;
 }
-
-
 

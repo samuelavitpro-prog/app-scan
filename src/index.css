@@ -674,6 +674,38 @@
   font-weight: 750;
 }
 #desktop-dashboard.locasyst-theme .quote-detail-actions .detail-primary { background: #3978a8; border-color: #3978a8; color: #fff; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid #d3dee8;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-status-draft {
+  background: #fff !important;
+  color: #536a82 !important;
+  border-color: #cbd9e5 !important;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-status-accepted {
+  background: #e9f5ef !important;
+  color: #267d51 !important;
+  border-color: #b9e0cb !important;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-badge {
+  display: inline-flex;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-preparing { background: #eaf2f7; color: #3978a8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-ready { background: #e9f5ef; color: #267d51; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-rental { background: #edf0ff; color: #5147b8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-returned { background: #fff4d9; color: #9a6812; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-operational-issue { background: #fdebed; color: #b33d52; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail { display: grid; min-height: 390px; place-content: center; justify-items: center; gap: 9px; color: #9aa8b7; text-align: center; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail strong { color: #536a82; font-size: 13px; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail p { max-width: 190px; margin: 0; font-size: 11px; }

@@ -479,7 +479,12 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
         const end = new Date(q.endDate);
         end.setHours(23, 59, 59, 999);
 
+        // Only an operational dossier enters the planning. A commercial quote
+        // remains in the quote list until it is explicitly prepared.
+        if (!q.rentalStatus) return;
         const isValidated = q.status === "accepted" || q.status === "invoiced" || q.status === "paid";
+        const isLate = (q.rentalStatus === "ready" || q.rentalStatus === "in_rental") && end < new Date();
+        const planningStatus = isLate ? "overdue" : q.rentalStatus;
 
         if (targetDate >= start && targetDate <= end) {
           // Material rental event
@@ -491,7 +496,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
                 title: `${isValidated ? "✓ " : ""}${q.clientName} (${q.quoteNumber})`,
                 subtitle: `${q.rentalItems.reduce((acc, i) => acc + i.quantity, 0)} réf. matériel${depositText}`,
                 type: "rental",
-                status: q.rentalStatus || (isValidated ? "validated" : "pending"),
+                status: planningStatus,
                 isValidated,
                 depositInfo: {
                   percent: q.depositPercent,
@@ -512,7 +517,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
                 title: `${isValidated ? "✓ " : ""}Studio : ${st.studioName}`,
                 subtitle: `Client : ${q.clientName} (${q.quoteNumber})`,
                 type: "studio",
-                status: q.rentalStatus || (isValidated ? "validated" : "pending"),
+                status: planningStatus,
                 isValidated,
                 depositInfo: {
                   percent: q.depositPercent,
@@ -533,7 +538,7 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
                 title: `${isValidated ? "✓ " : ""}${cr.technicianName} (${cr.role})`,
                 subtitle: `Mission client : ${q.clientName}`,
                 type: "crew",
-                status: q.rentalStatus || (isValidated ? "validated" : "pending"),
+                status: planningStatus,
                 isValidated,
                 quoteRef: q,
                 depotName: q.depotName,
@@ -1601,8 +1606,14 @@ export const CalendarPlanningDashboard: React.FC<CalendarPlanningDashboardProps>
                           key={evt.id}
                           onClick={() => evt.quoteRef && onSelectQuote && onSelectQuote(evt.quoteRef)}
                           className={`px-2 py-1 rounded-lg text-[10px] font-semibold truncate cursor-pointer transition ${
-                            evt.status === "overdue"
+                            evt.status === "overdue" || evt.status === "incomplete_return" || evt.status === "disputed"
                               ? "bg-rose-950 text-rose-300 border border-rose-800"
+                              : evt.status === "returned"
+                              ? "bg-amber-100 text-amber-800 border border-amber-300"
+                              : evt.status === "ready"
+                              ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                              : evt.status === "preparing"
+                              ? "bg-blue-950 text-blue-300 border border-blue-700"
                               : evt.type === "studio"
                               ? "bg-cyan-950 text-cyan-300 border border-cyan-800"
                               : evt.type === "crew"

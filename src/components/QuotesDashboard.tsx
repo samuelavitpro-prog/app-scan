@@ -156,6 +156,15 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
     if (converted) onOpenDossiers?.();
   };
 
+  const getOperationalBadge = (quote: ClientQuote) => {
+    if (quote.rentalStatus === "preparing") return <span className="quote-operational-badge quote-operational-preparing">Préparation</span>;
+    if (quote.rentalStatus === "ready") return <span className="quote-operational-badge quote-operational-ready">Prêt</span>;
+    if (quote.rentalStatus === "in_rental") return <span className="quote-operational-badge quote-operational-rental">En location</span>;
+    if (quote.rentalStatus === "returned") return <span className="quote-operational-badge quote-operational-returned">Retour complet</span>;
+    if (quote.rentalStatus === "overdue" || quote.rentalStatus === "incomplete_return" || quote.rentalStatus === "disputed") return <span className="quote-operational-badge quote-operational-issue">Retour à contrôler</span>;
+    return null;
+  };
+
   const filteredQuotes = safeQuotes.filter((q) => {
     const query = searchQuery.toLowerCase();
     const matchesQuery =
@@ -175,8 +184,8 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
     switch (status) {
       case "accepted":
         return (
-          <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            Accepté / En Tournage
+          <span className="quote-status quote-status-accepted">
+            Validé
           </span>
         );
       case "invoiced":
@@ -200,8 +209,8 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
         );
       default:
         return (
-          <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-            Brouillon
+          <span className="quote-status quote-status-draft">
+            Devis
           </span>
         );
     }
@@ -442,7 +451,12 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-center">{getStatusBadge(q.status)}</td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          {getStatusBadge(q.status)}
+                          {getOperationalBadge(q)}
+                        </div>
+                      </td>
 
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
@@ -514,9 +528,9 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
             <div className="quote-phase-rail">
               {[
                 ["Devis", true],
-                ["Préparation", selectedQuote.status === "accepted" || selectedQuote.status === "invoiced"],
-                ["Livraison", selectedQuote.status === "invoiced"],
-                ["Reprise", false],
+                ["Préparation", Boolean(selectedQuote.rentalStatus)],
+                ["Livraison", selectedQuote.rentalStatus === "in_rental" || selectedQuote.rentalStatus === "ready" || selectedQuote.rentalStatus === "returned"],
+                ["Reprise", selectedQuote.rentalStatus === "returned" || selectedQuote.rentalStatus === "incomplete_return"],
               ].map(([label, complete], index) => (
                 <div className={`quote-phase ${complete ? "complete" : index === 0 ? "current" : ""}`} key={String(label)}>
                   <span>{index + 1}</span><strong>{label}</strong>
@@ -536,8 +550,11 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
               <div><span>MONTANT TTC</span><strong className="detail-total">{(selectedQuote.totalTTC || 0).toLocaleString("fr-FR")} €</strong></div>
             </div>
             <div className="quote-detail-section quote-detail-actions">
-              {!selectedQuote.rentalStatus && (
+              {!selectedQuote.rentalStatus && selectedQuote.status === "draft" && (
                 <button onClick={() => handleConvertToDossier(selectedQuote)} className="detail-primary detail-operation-button"><Truck className="w-4 h-4" /> Créer le dossier d’exploitation</button>
+              )}
+              {!selectedQuote.rentalStatus && selectedQuote.status !== "draft" && (
+                <button onClick={() => handleConvertToDossier(selectedQuote)} className="detail-primary detail-operation-button"><Truck className="w-4 h-4" /> Préparer le dossier</button>
               )}
               <button onClick={() => handleOpenEditModal(selectedQuote)} className="detail-primary"><Edit2 className="w-4 h-4" /> Modifier le devis</button>
               <button onClick={() => handleDuplicateQuote(selectedQuote)}><Copy className="w-4 h-4" /> Dupliquer le devis</button>
