@@ -359,7 +359,7 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
 
       <div className="quotes-list-heading">
         <div><strong>Dossiers commerciaux</strong><span>{filteredQuotes.length} résultat{filteredQuotes.length > 1 ? "s" : ""}</span></div>
-        <span className="quotes-list-hint">Sélectionnez une ligne pour ouvrir le dossier</span>
+        <span className="quotes-list-hint">Clic droit sur une ligne pour afficher les actions</span>
       </div>
 
       {/* Quotes + operational detail */}
@@ -376,7 +376,6 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                 <th className="py-3.5 px-4 text-right">Montants HT / TTC</th>
                 <th className="py-3.5 px-4 text-center">Acompte & Caution</th>
                 <th className="py-3.5 px-4 text-center">Statut</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1e243d]">
@@ -478,49 +477,12 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => setShowPortalModalQuote(q)}
-                            title="Ouvrir le Portail Client & Lien de Signature en ligne"
-                            className="p-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 transition-colors"
-                          >
-                            <Globe className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            onClick={() => setShowPrintModal(q)}
-                            title="Imprimer Devis / Bons de sortie / Sous-loc"
-                            className="p-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 transition-colors"
-                          >
-                            <Printer className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            onClick={() => handleOpenEditModal(q)}
-                            title="Modifier le devis"
-                            className="p-1.5 rounded-xl bg-[#1d233d] hover:bg-[#283256] text-slate-300 hover:text-white transition-colors"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-
-                          {onDeleteQuote && (
-                            <button
-                              onClick={() => onDeleteQuote(q.id)}
-                              title="Supprimer le devis"
-                              className="p-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900 text-rose-400 hover:text-rose-200 border border-rose-800/40 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-500 italic">
+                  <td colSpan={7} className="py-8 text-center text-slate-500 italic">
                     Aucun devis trouvé pour ces critères de recherche.
                   </td>
                 </tr>
@@ -544,6 +506,9 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
             )}
             {!contextMenu.quote.rentalStatus && contextMenu.quote.status !== "draft" && (
               <button type="button" onClick={() => { closeContextMenu(); handleConvertToDossier(contextMenu.quote); }}><Truck /> Préparer le dossier</button>
+            )}
+            {contextMenu.quote.rentalStatus && (
+              <button type="button" onClick={() => { onOpenDossiers?.(); closeContextMenu(); }}><Truck /> Ouvrir le dossier d’exploitation</button>
             )}
             {contextMenu.quote.rentalStatus === "preparing" && (
               <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { rentalStatus: "ready" })}><CheckCircle2 /> Marquer Prêt</button>

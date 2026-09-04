@@ -759,6 +759,27 @@
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button svg { width: 15px; height: 15px; color: #3978a8; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button.quote-context-danger { color: #b33d52; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button.quote-context-danger svg { color: #b33d52; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(30,55,80,.06);
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell thead th {
+  background: #eaf1f6 !important;
+  color: #60778e !important;
+  border-right: 1px solid #d6e1ea;
+  white-space: nowrap;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody tr {
+  min-height: 68px;
+  background: #fff;
+  border-bottom: 1px solid #dfe7ee;
+}
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody tr:hover { background: #f2f8fb !important; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody td { color: #536a82; border-right: 1px solid #edf1f4; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody td .text-white,
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody td .text-slate-100,
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody td .text-slate-200 { color: #24374e !important; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail { display: grid; min-height: 390px; place-content: center; justify-items: center; gap: 9px; color: #9aa8b7; text-align: center; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail strong { color: #536a82; font-size: 13px; }
 #desktop-dashboard.locasyst-theme .quote-empty-detail p { max-width: 190px; margin: 0; font-size: 11px; }
