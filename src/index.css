@@ -740,6 +740,7 @@
   text-transform: uppercase;
 }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-heading strong { color: #24374e; font-size: 11px; letter-spacing: 0; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-subheading { padding: 8px 9px 3px; color: #8191a4; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-context-menu > button {
   display: flex;
   width: 100%;
@@ -786,6 +787,16 @@
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-button span { color: #3978a8; font-size: 13px; line-height: 1; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-centered { justify-content: center; width: 100%; text-align: center; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quote-sort-right { justify-content: flex-end; width: 100%; text-align: right; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell table { min-width: 1900px; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-table-muted { display: block; color: #8293a5; font-size: 10px; white-space: nowrap; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-table-type { color: #536a82; font-weight: 800; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-delivery-status { display: inline-flex; padding: 4px 7px; border-radius: 4px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-delivery-to_prepare { background: #fff; color: #536a82; border: 1px solid #cbd9e5; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-delivery-preparing { background: #eaf2f7; color: #3978a8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-delivery-in_delivery { background: #edf0ff; color: #5147b8; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-delivery-late { background: #fdebed; color: #b33d52; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-check { display: inline-grid; width: 17px; height: 17px; place-items: center; border: 1px solid #aebdcc; border-radius: 3px; color: #fff; font-size: 12px; font-weight: 900; }
+#desktop-dashboard.locasyst-theme #quotes-dashboard .quote-check.is-checked { background: #3978a8; border-color: #3978a8; }
 #desktop-dashboard.locasyst-theme #quotes-dashboard .quotes-table-shell tbody tr {
   min-height: 68px;
   background: #fff;

@@ -2196,6 +2196,16 @@ let technicians: any[] = loadedTechnicians.length > 0 ? loadedTechnicians : INIT
 const DEMO_QUOTE_IDS = new Set(["quote-lumens-226030033"]);
 let quotes: any[] = loadData<any[]>(QUOTES_FILE, INITIAL_QUOTES)
   .filter((quote) => !DEMO_QUOTE_IDS.has(quote.id));
+quotes = quotes.map((quote) => ({
+  ...quote,
+  trackingNumber: quote.trackingNumber || `KRM-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
+  deliveryStatus: quote.deliveryStatus || "to_prepare",
+  purchaseOrderReceived: Boolean(quote.purchaseOrderReceived),
+  invoiced: Boolean(quote.invoiced || quote.status === "invoiced"),
+  paidAmount: Number(quote.paidAmount ?? quote.depositAmount ?? 0),
+  dueDate: quote.dueDate || quote.endDate || quote.startDate,
+  internalReference: quote.internalReference || "",
+}));
 let depots: any[] = loadData<any[]>(DEPOTS_FILE, INITIAL_DEPOTS);
 let displays: any[] = loadData<any[]>(DISPLAYS_FILE, INITIAL_DISPLAYS);
 let playlists: any[] = loadData<any[]>(PLAYLISTS_FILE, INITIAL_PLAYLISTS);
@@ -4674,6 +4684,7 @@ app.post("/api/quotes", (req, res) => {
   }
 
   const quoteNumber = raw.quoteNumber || `DEV-${new Date().getFullYear()}-${String(quotes.length + 1).padStart(3, "0")}`;
+  const trackingNumber = raw.trackingNumber || `KRM-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
 
   // Calculate totals
   const rentalTotalHT = (raw.rentalItems || []).reduce((acc: number, item: any) => acc + (Number(item.totalHT) || 0), 0);
@@ -4689,6 +4700,7 @@ app.post("/api/quotes", (req, res) => {
 
   const newQuote = {
     id: raw.id || `quote-${Date.now()}`,
+    trackingNumber,
     quoteNumber,
     type: raw.type || "quote",
     clientId: raw.clientId || "",
@@ -4698,6 +4710,7 @@ app.post("/api/quotes", (req, res) => {
     clientPhone: raw.clientPhone || "",
     clientAddress: raw.clientAddress || "",
     clientProjectRef: raw.clientProjectRef || "",
+    internalReference: raw.internalReference || "",
     projectName: raw.projectName || "",
     projectManager: raw.projectManager || "",
     projectManagerPhone: raw.projectManagerPhone || "",
@@ -4714,6 +4727,7 @@ app.post("/api/quotes", (req, res) => {
     validityDate: raw.validityDate || new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0],
     startDate: raw.startDate || new Date().toISOString().split("T")[0],
     endDate: raw.endDate || new Date().toISOString().split("T")[0],
+    dueDate: raw.dueDate || raw.endDate || new Date().toISOString().split("T")[0],
     departureDate: raw.departureDate || "",
     departureTimeSlot: raw.departureTimeSlot || "",
     shootStartDate: raw.shootStartDate || "",
@@ -4725,6 +4739,9 @@ app.post("/api/quotes", (req, res) => {
     rentalCoefficient: Number(raw.rentalCoefficient || raw.globalRentalCoefficient || 1),
     globalRentalCoefficient: Number(raw.globalRentalCoefficient || raw.rentalCoefficient || 1),
     status: raw.status || "draft",
+    deliveryStatus: raw.deliveryStatus || "to_prepare",
+    purchaseOrderReceived: Boolean(raw.purchaseOrderReceived),
+    invoiced: Boolean(raw.invoiced || raw.status === "invoiced"),
     rentalItems: raw.rentalItems || [],
     studioRentals: raw.studioRentals || [],
     crewStaff: raw.crewStaff || [],
@@ -4735,6 +4752,7 @@ app.post("/api/quotes", (req, res) => {
     totalTTC: Math.round(totalTTC * 100) / 100,
     depositRequired: Number(raw.depositRequired || 0),
     depositAmount: Number(raw.depositAmount || 0),
+    paidAmount: Number(raw.paidAmount || raw.depositAmount || 0),
     depositPercent: Number(raw.depositPercent || 30),
     depositGuaranteeAmount: Number(raw.depositGuaranteeAmount || 0),
     paymentTermsDays: raw.paymentTermsDays || "Comptant à réception",

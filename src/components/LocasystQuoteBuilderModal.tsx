@@ -115,6 +115,9 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
   const [clientProjectRef, setClientProjectRef] = useState<string>(
     editingQuote?.clientProjectRef || ""
   );
+  const [internalReference, setInternalReference] = useState<string>(
+    editingQuote?.internalReference || ""
+  );
   const [eventLocation, setEventLocation] = useState<string>(
     editingQuote?.eventLocation || prefillClient?.deliveryAddress || "Palais des Congrès / Salle Polyvalente"
   );
@@ -203,6 +206,9 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
   );
   const [quoteStatus, setQuoteStatus] = useState<ClientQuote["status"]>(
     editingQuote?.status || "draft"
+  );
+  const [documentType, setDocumentType] = useState<ClientQuote["type"]>(
+    editingQuote?.type || "quote"
   );
 
   // Acompte
@@ -795,6 +801,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
       clientAddress: clientAddress.trim(),
       projectName: projectName.trim() || "Prestation Audiovisuelle",
       clientProjectRef: clientProjectRef.trim() || undefined,
+      internalReference: internalReference.trim() || undefined,
       eventLocation: eventLocation.trim() || undefined,
       shippingAddress: eventLocation.trim() || undefined,
       projectManager: projectManager.trim() || undefined,
@@ -806,7 +813,7 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
       onSiteContactName: onSiteContactName.trim() || undefined,
       onSiteContactPhone: onSiteContactPhone.trim() || undefined,
 
-      date: editingQuote?.date || new Date().toISOString().split("T")[0],
+      date: shootStartDate || departureDate || new Date().toISOString().split("T")[0],
       validityDate:
         editingQuote?.validityDate ||
         new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
@@ -828,6 +835,11 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
       appliedCoeffPreset: coeffPreset,
       globalRentalCoefficient: activeCoefficient,
       status: quoteStatus,
+      type: documentType,
+      dueDate: returnDate || shootEndDate,
+      deliveryStatus: editingQuote?.deliveryStatus || "to_prepare",
+      purchaseOrderReceived: editingQuote?.purchaseOrderReceived || false,
+      invoiced: documentType === "invoice" || quoteStatus === "invoiced",
 
       rentalItems,
       studioRentals,
@@ -1078,6 +1090,41 @@ export const LocasystQuoteBuilderModal: React.FC<LocasystQuoteBuilderModalProps>
                       <option value="paid">Payé</option>
                       <option value="rejected">Refusé</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-300 block mb-1 font-bold">Type de document</label>
+                    <select
+                      value={documentType}
+                      onChange={(e) => setDocumentType(e.target.value as ClientQuote["type"])}
+                      className="w-full bg-[#181d33] border border-[#273052] rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none font-bold"
+                    >
+                      <option value="quote">Devis</option>
+                      <option value="invoice">Facture</option>
+                      <option value="sale">Vente</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-300 block mb-1 font-bold">Référence interne KROMA</label>
+                    <input
+                      type="text"
+                      value={internalReference}
+                      onChange={(e) => setInternalReference(e.target.value)}
+                      placeholder="Ex : GALA-MEDIA-2026"
+                      className="w-full bg-[#181d33] border border-[#273052] rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-300 block mb-1 font-bold">Référence client</label>
+                    <input
+                      type="text"
+                      value={clientProjectRef}
+                      onChange={(e) => setClientProjectRef(e.target.value)}
+                      placeholder="Ex : BC-2026-014"
+                      className="w-full bg-[#181d33] border border-[#273052] rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-indigo-500 focus:outline-none"
+                    />
                   </div>
                 </div>
               </div>

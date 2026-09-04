@@ -739,8 +739,9 @@ export interface QuoteCrewLine {
 
 export interface ClientQuote {
   id: string;
+  trackingNumber?: string; // Identifiant interne aléatoire pour tracer les actions du compte
   quoteNumber: string; // e.g. "DEV-2026-001"
-  type: 'quote' | 'invoice' | 'contract';
+  type: 'quote' | 'invoice' | 'sale' | 'contract';
   clientName: string;
   clientCompany?: string;
   clientEmail?: string;
@@ -776,6 +777,7 @@ export interface ClientQuote {
   accountManager?: string; // Dossier suivi par (ex: "Bertrand BROT")
   accountManagerPhone?: string; // Tél chargé d'affaires (ex: "06 11 60 78 77")
   clientProjectRef?: string; // Vos références (ex: "Devis Josué")
+  internalReference?: string; // Référence interne KROMA, non imprimée sur les documents client
   clientPhone1?: string; // Tél.1
   clientMobile?: string; // Mobile
   billingCompanyName?: string;
@@ -830,6 +832,9 @@ export interface ClientQuote {
   globalRentalCoefficient?: number; // Coeff global par défaut
 
   status: 'draft' | 'sent' | 'accepted' | 'invoiced' | 'paid' | 'rejected';
+  deliveryStatus?: 'to_prepare' | 'preparing' | 'in_delivery' | 'late';
+  purchaseOrderReceived?: boolean;
+  invoiced?: boolean;
   
   // Lines
   rentalItems: QuoteItemLine[];
@@ -851,10 +856,12 @@ export interface ClientQuote {
   // Acompte réglable par l'utilisateur (déductible de la facture)
   depositPercent?: number; // Ex: 30 pour 30%
   depositAmount?: number; // Montant calculé ou fixé de l'acompte (TTC)
+  paidAmount?: number; // Total des règlements reçus en TTC
   depositStatus?: 'pending' | 'received' | 'not_required'; // Statut de l'acompte
   depositPaymentDate?: string;
   depositPaymentMethod?: 'cb' | 'virement' | 'cheque' | 'especes' | 'traite';
   depositNotes?: string;
+  dueDate?: string; // Échéance opérationnelle : fin de location ou date butoir de vente
 
   // Caution & Garantie Financière (Séparée de l'acompte, restituée au retour)
   totalReplacementValue?: number; // Valeur assurée totale du parc loué
@@ -1175,4 +1182,3 @@ export interface NetworkDisplayScreen {
   createdAt: string;
   updatedAt: string;
 }
-

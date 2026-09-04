@@ -3,13 +3,11 @@ import {
   FileText,
   Plus,
   Search,
-  Calendar,
   Truck,
   Copy,
   Printer,
   Trash2,
   Edit2,
-  TrendingUp,
   Globe,
   CheckCircle2,
 } from "lucide-react";
@@ -193,6 +191,15 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
     return null;
   };
 
+  const documentTypeLabel = (quote: ClientQuote) => quote.type === "invoice" ? "Facture" : quote.type === "sale" ? "Vente" : "Devis";
+  const deliveryStatusLabel = (quote: ClientQuote) => ({
+    to_prepare: "À préparer",
+    preparing: "En préparation",
+    in_delivery: "En livraison",
+    late: "En retard",
+  }[quote.deliveryStatus || "to_prepare"]);
+  const balanceAmount = (quote: ClientQuote) => Math.max(0, (quote.totalTTC || 0) - (quote.paidAmount ?? quote.depositAmount ?? 0));
+
   const filteredQuotes = safeQuotes.filter((q) => {
     const query = searchQuery.toLowerCase();
     const matchesQuery =
@@ -209,8 +216,9 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const sortedQuotes = [...filteredQuotes].sort((a, b) => {
     const valueFor = (quote: ClientQuote) => {
       switch (sortConfig.key) {
-        case "number": return quote.quoteNumber;
+        case "number": return quote.trackingNumber || quote.id;
         case "affair": return quote.projectName || quote.clientCompany || quote.clientName;
+        case "client": return quote.clientCompany || quote.clientName;
         case "dates": return quote.startDate;
         case "amount": return quote.totalHT || 0;
         case "subloc": return (quote.rentalItems || []).filter((item) => item.isSubRental).length;
@@ -406,114 +414,54 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-[#181d33] border-b border-[#232a48] text-[11px] uppercase tracking-wider text-slate-400 font-bold">
               <tr>
-                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("number")}>N° Devis & Date <span>{sortIndicator("number")}</span></button></th>
-                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("affair")}>{projectColumnLabel} <span>{sortIndicator("affair")}</span></button></th>
-                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("dates")}>{datesColumnLabel} <span>{sortIndicator("dates")}</span></button></th>
-                <th className="py-3.5 px-4 text-center"><button type="button" className="quote-sort-button quote-sort-centered" onClick={() => handleSort("subloc")}>Sous-Loc Confrère <span>{sortIndicator("subloc")}</span></button></th>
-                <th className="py-3.5 px-4 text-right"><button type="button" className="quote-sort-button quote-sort-right" onClick={() => handleSort("amount")}>Montant HT <span>{sortIndicator("amount")}</span></button></th>
-                <th className="py-3.5 px-4 text-center"><button type="button" className="quote-sort-button quote-sort-centered" onClick={() => handleSort("deposit")}>Acompte & Caution <span>{sortIndicator("deposit")}</span></button></th>
-                <th className="py-3.5 px-4 text-center"><button type="button" className="quote-sort-button quote-sort-centered" onClick={() => handleSort("status")}>Statut <span>{sortIndicator("status")}</span></button></th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("number")}>N° <span>{sortIndicator("number")}</span></button></th>
+                <th className="py-3.5 px-4">Type</th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("dates")}>Date <span>{sortIndicator("dates")}</span></button></th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("client")}>Client <span>{sortIndicator("client")}</span></button></th>
+                <th className="py-3.5 px-4"><button type="button" className="quote-sort-button" onClick={() => handleSort("affair")}>Affaire <span>{sortIndicator("affair")}</span></button></th>
+                <th className="py-3.5 px-4">Réf. interne</th>
+                <th className="py-3.5 px-4">Réf. client</th>
+                <th className="py-3.5 px-4">Devis n°</th>
+                <th className="py-3.5 px-4 text-right"><button type="button" className="quote-sort-button quote-sort-right" onClick={() => handleSort("amount")}>Total HT <span>{sortIndicator("amount")}</span></button></th>
+                <th className="py-3.5 px-4 text-right">Total TTC</th>
+                <th className="py-3.5 px-4 text-right">Solde</th>
+                <th className="py-3.5 px-4">Échéance</th>
+                <th className="py-3.5 px-4">Règlement</th>
+                <th className="py-3.5 px-4">Suivi par</th>
+                <th className="py-3.5 px-4">Statut livraison</th>
+                <th className="py-3.5 px-4 text-center">B/C</th>
+                <th className="py-3.5 px-4 text-center">Facturé</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1e243d]">
               {filteredQuotes.length > 0 ? (
                 sortedQuotes.map((q) => {
-                  const subCount = (q.rentalItems || []).filter((i) => i.isSubRental).length;
                   return (
                     <tr key={q.id} onClick={() => setSelectedQuoteId(q.id)} onContextMenu={(event) => handleQuoteContextMenu(event, q)} className={`quote-row hover:bg-[#161c33] transition-colors ${selectedQuote?.id === q.id ? "quote-row-selected" : ""}`}>
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-white flex items-center gap-1.5">
-                          <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                          {q.quoteNumber}
-                        </div>
-                        <span className="text-[11px] text-slate-400 block mt-0.5">{q.date}</span>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-100 flex items-center gap-1.5">
-                          {q.projectName ? (
-                            <span className="text-indigo-300">{q.projectName}</span>
-                          ) : (
-                            <span>{q.clientCompany || q.clientName}</span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">
-                          {q.productionCompany || q.clientCompany
-                            ? `${q.clientName} (${q.productionCompany || q.clientCompany})`
-                            : q.clientName}
-                        </div>
-                        {isCinemaProfile && q.directorOfPhotography && (
-                          <span className="text-[10px] text-rose-400 block mt-0.5 font-medium">
-                            DOP : {q.directorOfPhotography}
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-200 flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                          <span>
-                            {q.shootStartDate || q.startDate} → {q.shootEndDate || q.endDate}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-0.5 text-[11px]">
-                          <span className="px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-bold">
-                            {durationText(q)}
-                          </span>
-                          {q.hasPrepDay && (
-                            <span className="px-1.5 py-0.2 rounded bg-amber-950/70 text-amber-300 border border-amber-800 font-semibold text-[10px]">
-                              Prep Day
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        {subCount > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold">
-                            <TrendingUp className="w-3 h-3" />
-                            {subCount} sous-loc
-                          </span>
-                        ) : (
-                          <span className="text-slate-600 text-[11px]">Parc propre</span>
-                        )}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="font-bold text-white text-sm">
-                          {(q.totalHT || 0).toLocaleString("fr-FR")} €{" "}
-                          <span className="text-[10px] text-slate-400 font-normal">HT</span>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="text-[11px] font-bold text-amber-300">
-                          Acompte: {(q.depositAmount || 0).toLocaleString("fr-FR")} €
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">
-                          Caution: {(q.depositGuaranteeAmount || 0).toLocaleString("fr-FR")} € (
-                          {q.depositGuaranteeType === "imprint_cb"
-                            ? "CB"
-                            : q.depositGuaranteeType === "insurance_letter"
-                            ? "Assurance"
-                            : "Chèque"}
-                          )
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                          {getStatusBadge(q.status)}
-                          {getOperationalBadge(q)}
-                        </div>
-                      </td>
+                      <td className="py-3.5 px-4"><span className="font-mono font-bold text-slate-700">{q.trackingNumber || q.id}</span></td>
+                      <td className="py-3.5 px-4"><span className="quote-table-type">{documentTypeLabel(q)}</span></td>
+                      <td className="py-3.5 px-4"><span className="font-semibold text-slate-700">{q.shootStartDate || q.startDate || q.date}</span></td>
+                      <td className="py-3.5 px-4"><strong className="text-slate-800">{q.clientCompany || q.clientName}</strong><small className="quote-table-muted">{q.clientName}</small></td>
+                      <td className="py-3.5 px-4"><strong className="text-slate-800">{q.projectName || "—"}</strong></td>
+                      <td className="py-3.5 px-4"><span className="quote-table-muted">{q.internalReference || "—"}</span></td>
+                      <td className="py-3.5 px-4"><span className="quote-table-muted">{q.clientProjectRef || "—"}</span></td>
+                      <td className="py-3.5 px-4"><span className="font-semibold text-slate-700">{q.quoteNumber}</span></td>
+                      <td className="py-3.5 px-4 text-right"><strong className="text-slate-800">{(q.totalHT || 0).toLocaleString("fr-FR")} €</strong></td>
+                      <td className="py-3.5 px-4 text-right"><strong className="text-slate-800">{(q.totalTTC || 0).toLocaleString("fr-FR")} €</strong></td>
+                      <td className="py-3.5 px-4 text-right"><strong className="text-slate-800">{balanceAmount(q).toLocaleString("fr-FR")} €</strong></td>
+                      <td className="py-3.5 px-4"><span className="quote-table-muted">{q.dueDate || q.endDate || "—"}</span></td>
+                      <td className="py-3.5 px-4"><span className="quote-table-muted">Acompte : {(q.depositAmount || 0).toLocaleString("fr-FR")} €</span></td>
+                      <td className="py-3.5 px-4"><span className="quote-table-muted">{q.projectManager || q.accountManager || "—"}</span></td>
+                      <td className="py-3.5 px-4"><span className={`quote-delivery-status quote-delivery-${q.deliveryStatus || "to_prepare"}`}>{deliveryStatusLabel(q)}</span></td>
+                      <td className="py-3.5 px-4 text-center"><span className={`quote-check ${q.purchaseOrderReceived ? "is-checked" : ""}`}>{q.purchaseOrderReceived ? "✓" : ""}</span></td>
+                      <td className="py-3.5 px-4 text-center"><span className={`quote-check ${q.invoiced || q.status === "invoiced" ? "is-checked" : ""}`}>{q.invoiced || q.status === "invoiced" ? "✓" : ""}</span></td>
 
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500 italic">
+                  <td colSpan={17} className="py-8 text-center text-slate-500 italic">
                     Aucun devis trouvé pour ces critères de recherche.
                   </td>
                 </tr>
@@ -546,6 +494,16 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
             )}
             {contextMenu.quote.rentalStatus === "ready" && (
               <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { rentalStatus: "in_rental" })}><Truck /> Passer En location</button>
+            )}
+            <div className="quote-context-subheading">Statut livraison</div>
+            {(["to_prepare", "preparing", "in_delivery", "late"] as const).map((deliveryStatus) => (
+              <button key={deliveryStatus} type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { deliveryStatus })}>
+                <CheckCircle2 /> {({ to_prepare: "À préparer", preparing: "En préparation", in_delivery: "En livraison", late: "En retard" }[deliveryStatus])}
+              </button>
+            ))}
+            <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { purchaseOrderReceived: !contextMenu.quote.purchaseOrderReceived })}><CheckCircle2 /> {contextMenu.quote.purchaseOrderReceived ? "Retirer le B/C" : "Marquer B/C reçu"}</button>
+            {!contextMenu.quote.invoiced && contextMenu.quote.status !== "invoiced" && (
+              <button type="button" onClick={() => updateQuoteStatus(contextMenu.quote, { type: "invoice", status: "invoiced", invoiced: true })}><CheckCircle2 /> Passer en facture</button>
             )}
             <button type="button" onClick={() => { setShowPrintModal(contextMenu.quote); closeContextMenu(); }}><Printer /> Générer un document</button>
             <button type="button" onClick={() => { handleDuplicateQuote(contextMenu.quote); closeContextMenu(); }}><Copy /> Dupliquer</button>
