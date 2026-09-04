@@ -95,7 +95,6 @@ export const QuotesDashboard: React.FC<QuotesDashboardProps> = ({
   const isWeddingProfile = activeProfile?.id === "wedding";
   const projectColumnLabel = isCinemaProfile ? "Projet / Film & Production" : isWeddingProfile ? "Mariage" : "Affaire";
   const datesColumnLabel = isCinemaProfile ? "Dates tournage & barème" : isWeddingProfile ? "Dates cérémonie" : "Dates";
-  const durationLabel = isCinemaProfile ? "tournage" : isWeddingProfile ? "prestation" : "événement";
   const durationText = (quote: ClientQuote) => isCinemaProfile
     ? `${quote.shootDaysCount || quote.durationDays || 1}j tournage`
     : `${quote.shootDaysCount || quote.durationDays || 1} jour(s)`;
