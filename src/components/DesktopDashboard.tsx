@@ -1363,7 +1363,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
               </div>
 
               {/* Quick Operational Grid */}
-              <div className="dashboard-quick-grid grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="dashboard-quick-grid grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 {/* Active Rentals Summary */}
                 <div className="bg-[#0e111d] border border-[#1e233b] rounded-2xl p-4 shadow-sm space-y-3">
                   <div className="flex items-center justify-between pb-2 border-b border-[#1b2038]">
@@ -1454,7 +1454,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
               </div>
 
               {/* Low Stock & System Scan Logs Overview */}
-              <div className="dashboard-log-grid grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="dashboard-log-grid grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                 {/* Low Stock Alerts */}
                 <div className="bg-[#0e111d] border border-[#1e233b] rounded-2xl p-4 shadow-sm space-y-3">
                   <div className="flex items-center justify-between pb-2 border-b border-[#1b2038]">

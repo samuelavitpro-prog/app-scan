@@ -98,6 +98,28 @@
   content: "";
 }
 #desktop-dashboard.locasyst-theme .dashboard-hero > div { position: relative; z-index: 1; }
+#desktop-dashboard.locasyst-theme .dashboard-hero h2 { font-size: clamp(1.55rem, 2.1vw, 2rem) !important; }
+#desktop-dashboard.locasyst-theme .dashboard-hero p { font-size: 13px !important; line-height: 1.5 !important; }
+#desktop-dashboard.locasyst-theme .dashboard-quick-grid,
+#desktop-dashboard.locasyst-theme .dashboard-log-grid { align-items: start !important; }
+#desktop-dashboard.locasyst-theme .dashboard-quick-grid > div,
+#desktop-dashboard.locasyst-theme .dashboard-log-grid > div { height: fit-content; min-height: 0 !important; }
+#desktop-dashboard.locasyst-theme .dashboard-quick-grid .text-xs,
+#desktop-dashboard.locasyst-theme .dashboard-log-grid .text-xs { font-size: 13px !important; }
+#desktop-dashboard.locasyst-theme .dashboard-quick-grid .text-\[11px\],
+#desktop-dashboard.locasyst-theme .dashboard-log-grid .text-\[11px\] { font-size: 12px !important; }
+#desktop-dashboard.locasyst-theme .dashboard-quick-grid .text-\[10px\],
+#desktop-dashboard.locasyst-theme .dashboard-log-grid .text-\[10px\] { font-size: 11px !important; }
+#desktop-dashboard.locasyst-theme .dashboard-kpis .text-\[11px\] { font-size: 12px !important; }
+#desktop-dashboard.locasyst-theme .dashboard-kpis .text-2xl { font-size: 1.65rem !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-dashboard,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-calendar,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-quotes,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-rentals,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-directory,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-invoices,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-inventory,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-settings { font-size: 13px !important; }
 #desktop-dashboard.locasyst-theme .dashboard-kpis > div,
 #desktop-dashboard.locasyst-theme .dashboard-quick-grid > div,
 #desktop-dashboard.locasyst-theme .dashboard-log-grid > div {
