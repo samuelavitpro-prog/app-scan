@@ -1166,11 +1166,40 @@ textarea:focus-visible {
 
 #desktop-dashboard.locasyst-theme .locasyst-sidebar {
   top: 88px;
-  padding: 12px !important;
+  padding: 10px !important;
   border-color: #d5e0e9 !important;
   background: rgba(255, 255, 255, .92) !important;
   box-shadow: 0 12px 30px rgba(25, 53, 79, .07) !important;
+  gap: 10px !important;
 }
+
+#desktop-dashboard.locasyst-theme .locasyst-sidebar > div:first-child { gap: 10px !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .space-y-1 { gap: 2px !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .space-y-1 > div:first-child { margin-top: 5px; margin-bottom: 2px; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .workspace-profile-card,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .relative > .p-2\.5 { padding: 9px !important; border-radius: 13px !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .workspace-profile-card p { margin-top: 5px !important; line-height: 1.35 !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .workspace-profile-card select { padding-top: 7px !important; padding-bottom: 7px !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-dashboard,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-calendar,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-displays,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-quotes,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-rentals,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-directory,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-invoices,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-inventory,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-flightcases,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-maintenance,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-studios,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-technicians,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-logs,
+#desktop-dashboard.locasyst-theme .locasyst-sidebar #nav-tab-settings {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  border-radius: 10px !important;
+}
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .border-b { padding-bottom: 9px !important; }
+#desktop-dashboard.locasyst-theme .locasyst-sidebar .border-t { padding-top: 9px !important; }
 
 #desktop-dashboard.locasyst-theme .locasyst-sidebar .border-b,
 #desktop-dashboard.locasyst-theme .locasyst-sidebar .border-t {
